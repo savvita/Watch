@@ -7,9 +7,8 @@ namespace Watch.DataAccess.UI.Models
     {
         public int Id { get; set; }
 
-        [Required]
         [StringLength(100)]
-        public string CategoryName { get; set; } = null!;
+        public string? CategoryName { get; set; }
 
         public Category()
         {
@@ -23,6 +22,11 @@ namespace Watch.DataAccess.UI.Models
 
         public static explicit operator CategoryModel(Category category)
         {
+            if (category.CategoryName == null)
+            {
+                throw new ArgumentNullException();
+            }
+
             return new CategoryModel()
             {
                 Id = category.Id,

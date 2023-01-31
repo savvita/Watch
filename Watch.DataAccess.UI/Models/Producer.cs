@@ -7,9 +7,8 @@ namespace Watch.DataAccess.UI.Models
     {
         public int Id { get; set; }
 
-        [Required]
         [StringLength(100)]
-        public string ProducerName { get; set; } = null!;
+        public string? ProducerName { get; set; }
 
         public Producer()
         {
@@ -23,6 +22,10 @@ namespace Watch.DataAccess.UI.Models
 
         public static explicit operator ProducerModel(Producer producer)
         {
+            if(producer.ProducerName == null)
+            {
+                throw new ArgumentNullException();
+            }
             return new ProducerModel()
             {
                 Id = producer.Id,

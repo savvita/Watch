@@ -1,15 +1,12 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Microsoft.AspNetCore.Identity;
+using System.ComponentModel.DataAnnotations;
 using Watch.Domain.Models;
 
 namespace Watch.DataAccess.UI.Models
 {
-    public class User
+    public class User : IdentityUser
     {
-        public string? Id { get; set; }
         public long? ChatId { get; set; }
-
-        [StringLength(100)]
-        public string? UserName { get; set; }
 
         [StringLength(100)]
         public string? FirstName { get; set; }

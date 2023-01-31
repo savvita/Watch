@@ -1,16 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Watch.DataAccess.Repositories;
+﻿using Watch.DataAccess.Repositories;
 using Watch.Domain.Interfaces;
 
 namespace Watch.DataAccess.UnitOfWorks
 {
     public class UnitOfWorks : IUnitOfWorks
     {
-        private WatchDbContext _db;
+        private readonly WatchDbContext _db;
         public ICategoryRepository Categories { get; }
         public IOrderDetailRepository OrderDetails { get; }
         public IOrderRepository Orders { get; }

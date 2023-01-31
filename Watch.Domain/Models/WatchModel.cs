@@ -5,6 +5,7 @@
         public int Id { get; set; }
         public int CategoryId { get; set; }
         public int ProducerId { get; set; }
+        public string Model { get; set; } = null!;
         public decimal Price { get; set; }
         public string? ImageUrl { get; set; }
         public int Available { get; set; }

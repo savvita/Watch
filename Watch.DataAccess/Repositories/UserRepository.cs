@@ -8,5 +8,10 @@ namespace Watch.DataAccess.Repositories
         public UserRepository(WatchDbContext context) : base(context)
         {
         }
+
+        public async Task<UserModel?> GetByUserNameAsync(string username)
+        {
+            return await Task.FromResult<UserModel?>(_db.Users.FirstOrDefault(u => u.UserName.Equals(username)));
+        }
     }
 }

@@ -4,5 +4,6 @@ namespace Watch.Domain.Interfaces
 {
     public interface IUserRepository : IGenericRepository<UserModel>
     {
+        Task<UserModel?> GetByUserNameAsync(string username);
     }
 }

@@ -35,6 +35,13 @@ namespace Watch.DataAccess.UI.Repositories
             return model != null ? new User(model) : null;
         }
 
+        public async Task<User?> GetByUserNameAsync(string username)
+        {
+            var model = await _db.Users.GetByUserNameAsync(username);
+
+            return model != null ? new User(model) : null;
+        }
+
         public async Task<User> UpdateAsync(User entity)
         {
             var model = await _db.Users.UpdateAsync((UserModel)entity);

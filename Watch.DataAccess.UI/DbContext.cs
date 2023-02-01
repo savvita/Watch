@@ -1,4 +1,5 @@
 ﻿using Watch.DataAccess.UI.Interfaces;
+using Watch.DataAccess.UI.Models;
 using Watch.DataAccess.UI.Repositories;
 
 namespace Watch.DataAccess.UI
@@ -7,6 +8,7 @@ namespace Watch.DataAccess.UI
     {
         public ICategoryRepository Categories { get; }
         public IOrderRepository Orders { get; }
+        public IBasketRepository Baskets { get; }
         public IProducerRepository Producers { get; }
         public IOrderStatusRepository OrderStatuses { get; }
         public IUserRepository Users { get; }
@@ -19,6 +21,7 @@ namespace Watch.DataAccess.UI
             _context = context;
             Categories = new CategoryRepository(context);
             Orders = new OrderRepository(context);
+            Baskets = new BasketRepository(context);
             Producers = new ProducerRepository(context);
             OrderStatuses = new OrderStatusRepository(context);
             Users = new UserRepository(context);

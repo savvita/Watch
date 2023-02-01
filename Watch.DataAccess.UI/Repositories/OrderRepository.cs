@@ -11,58 +11,67 @@ namespace Watch.DataAccess.UI.Repositories
         {
             _db = new UnitOfWorks.UnitOfWorks(context);
         }
+
+        public async Task<Order?> CreateAsync(Basket basket)
+        {
+            var model = await _db.CreateOrderAsync((BasketModel)basket);
+            return model != null ? new Order(model) : null;
+        }
         public async Task<Order?> CreateAsync(Order entity)
         {
-            var details = entity.Details;
+            var model = await _db.Orders.CreateAsync((OrderModel)entity);
 
-            var model = await _db.Orders.CreateAsync(new OrderModel()
-            {
-                Date = entity.Date,
-                StatusId = entity.Status != null ? entity.Status.Id : 0,
-                UserId = entity.UserId
-            });
+            return model != null ? new Order(model) : null;
+            //var details = entity.Details;
 
-            if(model == null)
-            {
-                return null;
-            }
+            //var model = await _db.Orders.CreateAsync(new OrderModel()
+            //{
+            //    Date = entity.Date,
+            //    StatusId = entity.Status != null ? entity.Status.Id : 0,
+            //    UserId = entity.UserId
+            //});
 
-            entity = new Order(model)
-            {
-                Details = details
-            };
+            //if(model == null)
+            //{
+            //    return null;
+            //}
 
-            entity.Details.ForEach(async detail => 
-            {
-                var watch = await _db.Watches.GetAsync(detail.WatchId);
-                if(watch == null || watch.Available < detail.Count || watch.OnSale == false)
-                {
-                    return;
-                }
+            //entity = new Order(model)
+            //{
+            //    Details = details
+            //};
 
-                watch.Available -= detail.Count;
+            //entity.Details.ForEach(async detail => 
+            //{
+            //    var watch = await _db.Watches.GetAsync(detail.WatchId);
+            //    if(watch == null || watch.Available < detail.Count || watch.OnSale == false)
+            //    {
+            //        return;
+            //    }
 
-                if(watch.Available == 0)
-                {
-                    watch.OnSale = false;
-                }
+            //    watch.Available -= detail.Count;
 
-                watch.Sold += detail.Count;
+            //    if(watch.Available == 0)
+            //    {
+            //        watch.OnSale = false;
+            //    }
 
-                await _db.Watches.UpdateAsync(watch);
+            //    watch.Sold += detail.Count;
 
-                await _db.OrderDetails.CreateAsync(new OrderDetailModel()
-                {
-                    OrderId = entity.Id,
-                    WatchId = detail.WatchId,
-                    Count = detail.Count,
-                    UnitPrice = detail.UnitPrice
-                });
+            //    await _db.Watches.UpdateAsync(watch);
+
+            //    await _db.OrderDetails.CreateAsync(new OrderDetailModel()
+            //    {
+            //        OrderId = entity.Id,
+            //        WatchId = detail.WatchId,
+            //        Count = detail.Count,
+            //        UnitPrice = detail.UnitPrice
+            //    });
 
 
-            });
+            //});
 
-            return entity;
+            //return entity;
         }
 
         public async Task<bool> DeleteAsync(int id)
@@ -108,6 +117,24 @@ namespace Watch.DataAccess.UI.Repositories
             {
                 Details = details
             };
+        }
+
+        public async Task<IEnumerable<Order>> GetByUserIdAsync(string userId)
+        {
+            var models = await _db.Orders.GetByUserIdAsync(userId);
+
+            List<Order> orders = new List<Order>();
+
+            foreach (var model in models)
+            {
+                var details = (await _db.OrderDetails.GetByOrderIdAsync(model.Id)).Select(model => new OrderDetail(model)).ToList();
+                orders.Add(new Order(model)
+                {
+                    Details = details
+                });
+            }
+
+            return orders;
         }
 
         public async Task<Order> UpdateAsync(Order entity)

@@ -41,5 +41,6 @@ namespace Watch.DataAccess.UI.Repositories
 
             return new User(model);
         }
+
     }
 }

@@ -51,6 +51,16 @@ namespace Watch.WebApi
                         StatusCode = (int)HttpStatusCode.InternalServerError
                     };
                 }
+                else if (context.Exception is UserNotFoundException)
+                {
+                    context.Result = new ObjectResult(new
+                    {
+                        code = "user-not-found"
+                    })
+                    {
+                        StatusCode = (int)HttpStatusCode.NotFound
+                    };
+                }
                 else
                 {
                     context.Result = new ObjectResult(new

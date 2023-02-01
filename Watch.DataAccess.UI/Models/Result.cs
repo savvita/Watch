@@ -4,5 +4,6 @@
     {
         public string? Token { get; set; }
         public T? Value { get; set; }
+        public int Hits { get; set; }
     }
 }

@@ -22,6 +22,7 @@ namespace Watch.DataAccess.UI.Models
             ChatId = model.ChatId;
             UserName = model.UserName;
             FirstName = model.FirstName;
+            Email = model.Email;
         }
 
         public static explicit operator UserModel(User user)

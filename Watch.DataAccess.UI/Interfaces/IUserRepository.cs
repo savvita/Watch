@@ -4,5 +4,6 @@ namespace Watch.DataAccess.UI.Interfaces
 {
     public interface IUserRepository : IGenericRepository<User>
     {
+
     }
 }

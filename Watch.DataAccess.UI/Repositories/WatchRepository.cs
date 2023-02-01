@@ -53,16 +53,15 @@ namespace Watch.DataAccess.UI.Repositories
             return new Watch.DataAccess.UI.Models.Watch(model);
         }
 
-        public async Task<IEnumerable<Models.Watch>> GetAsync(int page, 
-                                                        int perPage, 
-                                                        string? model, 
-                                                        List<int>? categoryIds = null, 
-                                                        List<int>? producerIds = null, 
-                                                        decimal? minPrice = null, 
-                                                        decimal? maxPrice = null, 
-                                                        bool? onSale = null)
+        public async Task<IEnumerable<Models.Watch>> GetAsync(  string? model, 
+                                                                List<int>? categoryIds = null, 
+                                                                List<int>? producerIds = null, 
+                                                                decimal? minPrice = null, 
+                                                                decimal? maxPrice = null, 
+                                                                bool? onSale = null,
+                                                                bool? isPopular = null)
         {
-            var models = await _db.Watches.GetAsync(page, perPage, model, categoryIds, producerIds, minPrice, maxPrice, onSale);
+            var models = await _db.Watches.GetAsync(model, categoryIds, producerIds, minPrice, maxPrice, onSale, isPopular);
 
             foreach (var m in models)
             {
@@ -78,7 +77,7 @@ namespace Watch.DataAccess.UI.Repositories
         {
             var model = await _db.Watches.GetAsync(id);
 
-            if (model == null || model.OnSale == true)
+            if (model == null || model.OnSale == true || model.Available == 0)
             {
                 return false;
             }

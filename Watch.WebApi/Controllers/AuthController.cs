@@ -14,7 +14,7 @@ namespace Watch.WebApi.Controllers
 {
     [ApiController]
     [Route("api/auth")]
-    public class AuthController :ControllerBase
+    public class AuthController : ControllerBase
     {
         private readonly IConfiguration _configuration;
         private readonly RoleManager<IdentityRole> _roleManager;
@@ -123,6 +123,16 @@ namespace Watch.WebApi.Controllers
                 throw new AuthorizationException();
             }
 
+            if (!await _roleManager.RoleExistsAsync(UserRoles.User))
+            {
+                await _roleManager.CreateAsync(new IdentityRole(UserRoles.User));
+            }
+
+            if (!await _roleManager.RoleExistsAsync(UserRoles.Manager))
+            {
+                await _roleManager.CreateAsync(new IdentityRole(UserRoles.Manager));
+            }
+
             if (await _roleManager.RoleExistsAsync(UserRoles.User))
                 await _userManager.AddToRoleAsync(iUser, UserRoles.User);
 
@@ -171,11 +181,18 @@ namespace Watch.WebApi.Controllers
                 throw new AuthorizationException();
             }
 
+            if (!await _roleManager.RoleExistsAsync(UserRoles.User))
+            {
+                await _roleManager.CreateAsync(new IdentityRole(UserRoles.User));
+            }
+
+            if (!await _roleManager.RoleExistsAsync(UserRoles.Admin))
+            {
+                await _roleManager.CreateAsync(new IdentityRole(UserRoles.Admin));
+            }
+
             if (await _roleManager.RoleExistsAsync(UserRoles.User))
                 await _userManager.AddToRoleAsync(iUser, UserRoles.User);
-
-            if (await _roleManager.RoleExistsAsync(UserRoles.Manager))
-                await _userManager.AddToRoleAsync(iUser, UserRoles.Manager);
 
             if (await _roleManager.RoleExistsAsync(UserRoles.Admin))
                 await _userManager.AddToRoleAsync(iUser, UserRoles.Admin);

@@ -10,12 +10,13 @@ namespace Watch.DataAccess.Repositories
         {
         }
 
-        public async Task<IEnumerable<WatchModel>> GetAsync(int page, int perPage, string? model,
+        public async Task<IEnumerable<WatchModel>> GetAsync(string? model,
                                                                List<int>? categoryIds = null,
                                                                List<int>? producerIds = null,
                                                                decimal? minPrice = null,
                                                                decimal? maxPrice = null,
-                                                               bool? onSale = null)
+                                                               bool? onSale = null,
+                                                               bool? isPopular = null)
         {
             var watches = _db.Watches.Include(w => w.Producer).ToList();
 
@@ -52,8 +53,13 @@ namespace Watch.DataAccess.Repositories
                 watches = watches.Where(w => w.OnSale == onSale).ToList();
             }
 
+            if (isPopular != null)
+            {
+                watches = watches.Where(w => w.IsPopular == isPopular).ToList();
+            }
 
-            watches = watches.Skip((page - 1) * perPage).Take(perPage).ToList();
+
+            watches = watches.ToList();
 
             return watches;
         }

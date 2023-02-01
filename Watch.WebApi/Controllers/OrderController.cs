@@ -24,20 +24,25 @@ namespace Watch.WebApi.Controllers
         [Authorize(Roles = $"{UserRoles.Admin},{UserRoles.Manager}")]
         public async Task<Result<List<Order>>> Get()
         {
+            var orders = (await _context.Orders.GetAsync()).ToList();
             return new Result<List<Order>>
             {
-                Value = (await _context.Orders.GetAsync()).ToList(),
+                Value = orders,
+                Hits = orders.Count,
                 Token = new JwtSecurityTokenHandler().WriteToken(JwtHelper.GetToken(User.Claims, _configuration))
             };
         }
 
         [HttpGet("{id:int}")]
-        [Authorize(Roles = $"{UserRoles.Admin},{UserRoles.Manager}")]
+        //[Authorize(Roles = $"{UserRoles.Admin},{UserRoles.Manager}")]
+        [Authorize(Roles = UserRoles.Manager)]
         public async Task<Result<Order?>> Get(int id)
         {
+            var res = await _context.Orders.GetAsync(id);
             return new Result<Order?>
             {
-                Value = await _context.Orders.GetAsync(id),
+                Value = res,
+                Hits = res != null ? 1 : 0,
                 Token = new JwtSecurityTokenHandler().WriteToken(JwtHelper.GetToken(User.Claims, _configuration))
             };
         }
@@ -46,31 +51,38 @@ namespace Watch.WebApi.Controllers
         [Authorize]
         public async Task<Result<Order>> Create([FromBody] Order order)
         {
+            var res = await _context.Orders.CreateAsync(order);
             return new Result<Order>
             {
-                Value = await _context.Orders.CreateAsync(order),
+                Value = res,
+                Hits = res != null ? 1 : 0,
                 Token = new JwtSecurityTokenHandler().WriteToken(JwtHelper.GetToken(User.Claims, _configuration))
             };
         }
 
         [HttpPut("")]
-        [Authorize(Roles = $"{UserRoles.Admin},{UserRoles.Manager}")]
+        //[Authorize(Roles = $"{UserRoles.Admin},{UserRoles.Manager}")]
+        [Authorize(Roles = UserRoles.Manager)]
         public async Task<Result<Order?>> Update([FromBody] Order order)
         {
             return new Result<Order?>
             {
                 Value = await _context.Orders.UpdateAsync(order),
+                Hits = 1,
                 Token = new JwtSecurityTokenHandler().WriteToken(JwtHelper.GetToken(User.Claims, _configuration))
             };
         }
 
         [HttpDelete("{id:int}")]
-        [Authorize(Roles = $"{UserRoles.Admin},{UserRoles.Manager}")]
+        //[Authorize(Roles = $"{UserRoles.Admin},{UserRoles.Manager}")]
+        [Authorize(Roles = UserRoles.Manager)]
         public async Task<Result<bool>> Delete(int id)
         {
+            var res = await _context.Orders.DeleteAsync(id);
             return new Result<bool>
             {
-                Value = await _context.Orders.DeleteAsync(id),
+                Value = res,
+                Hits = res == true ? 1 : 0,
                 Token = new JwtSecurityTokenHandler().WriteToken(JwtHelper.GetToken(User.Claims, _configuration))
             };
         }

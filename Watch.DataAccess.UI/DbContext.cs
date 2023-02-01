@@ -12,14 +12,22 @@ namespace Watch.DataAccess.UI
         public IUserRepository Users { get; }
         public IWatchRepository Watches { get; }
 
+        private readonly WatchDbContext _context;
+
         public DbContext(WatchDbContext context)
         {
+            _context = context;
             Categories = new CategoryRepository(context);
             Orders = new OrderRepository(context);
             Producers = new ProducerRepository(context);
             OrderStatuses = new OrderStatusRepository(context);
             Users = new UserRepository(context);
             Watches = new WatchRepository(context);
+        }
+
+        public async Task SaveChangesAsync()
+        {
+            await _context.SaveChangesAsync();
         }
     }
 }

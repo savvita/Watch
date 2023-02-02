@@ -55,11 +55,6 @@ namespace Watch.DataAccess.UI.Repositories
 
         public async Task<bool> DeleteAsync(int id)
         {
-            (await _db.BasketDetails.GetAsync())
-                .Where(detail => detail.BasketId == id)
-                .ToList()
-                .ForEach(async (detail) => await _db.BasketDetails.DeleteAsync(detail.Id));
-
             return await _db.Baskets.DeleteAsync(id);
         }
 
@@ -117,11 +112,27 @@ namespace Watch.DataAccess.UI.Repositories
 
         public async Task<Basket> UpdateAsync(Basket entity)
         {
-            entity.Details.ForEach(async (detail) => await _db.BasketDetails.UpdateAsync((BasketDetailModel)detail));
+            foreach(var detail in entity.Details)
+            {
+                if(detail.Count == 0)
+                {
+                    await _db.BasketDetails.DeleteAsync(detail.Id);
+                    continue;
+                }
 
-            var model = await _db.Baskets.UpdateAsync((BasketModel)entity);
+                var d = await _db.BasketDetails.GetAsync(detail.Id);
 
-            return new Basket(model);
+                if (d == null)
+                {
+                    d = await _db.BasketDetails.CreateAsync((BasketDetailModel)detail);
+                }
+                else
+                {
+                    d.Count = detail.Count;
+                    await _db.BasketDetails.UpdateAsync(d);
+                }
+            }
+            return entity;
         }
     }
 }

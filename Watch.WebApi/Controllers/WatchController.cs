@@ -5,6 +5,7 @@ using Watch.DataAccess;
 using Watch.DataAccess.UI;
 using Watch.DataAccess.UI.Models;
 using Watch.DataAccess.UI.Roles;
+using Watch.WebApi.Cache;
 
 namespace Watch.WebApi.Controllers
 {
@@ -14,20 +15,32 @@ namespace Watch.WebApi.Controllers
     {
         private readonly DbContext _context;
         private readonly IConfiguration _configuration;
-        public WatchController(WatchDbContext context, IConfiguration configuration)
+        private readonly ICacheService _cacheService;
+        public WatchController(WatchDbContext context, IConfiguration configuration, ICacheService cacheService)
         {
             _context = new DbContext(context);
             _configuration = configuration;
+            _cacheService = cacheService;
         }
 
         [HttpGet("")]
         public async Task<Result<List<Watch.DataAccess.UI.Models.Watch>>> Get()
         {
-            var watches = (await _context.Watches.GetAsync()).ToList();
+            var cached = await _cacheService.GetData<List<Watch.DataAccess.UI.Models.Watch>>("watches");
+
+            if(cached == null)
+            {
+                var watches = (await _context.Watches.GetAsync()).ToList();
+                if (watches.Count > 0)
+                {
+                    await _cacheService.SetData("watches", watches, DateTimeOffset.Now.AddDays(1));
+                    cached = watches;
+                }
+            }
             return new Result<List<Watch.DataAccess.UI.Models.Watch>>
             {
-                Value = watches,
-                Hits = watches.Count,
+                Value = cached,
+                Hits = cached == null ? 0 : cached.Count,
                 Token = User.Claims.Count() > 0 ? new JwtSecurityTokenHandler().WriteToken(JwtHelper.GetToken(User.Claims, _configuration)) : null
             };
         }
@@ -42,9 +55,8 @@ namespace Watch.WebApi.Controllers
                                                         [FromQuery] decimal? maxPrice = null,
                                                         [FromQuery] bool? onSale = null,
                                                         [FromQuery] bool? isPopular = null)
-        {
+        { 
             var watches = (await _context.Watches.GetAsync(model, categoryIds!.Count > 0 ? categoryIds : null, producerIds!.Count > 0 ? producerIds : null, minPrice, maxPrice, onSale, isPopular)).ToList();
-
 
             return new Result<List<Watch.DataAccess.UI.Models.Watch>>
             {
@@ -71,6 +83,7 @@ namespace Watch.WebApi.Controllers
         [Authorize(Roles = UserRoles.Manager)]
         public async Task<Result<Watch.DataAccess.UI.Models.Watch>> Create([FromBody] Watch.DataAccess.UI.Models.Watch watch)
         {
+            await _cacheService.RemoveData("watches");
             var res = await _context.Watches.CreateAsync(watch);
             return new Result<Watch.DataAccess.UI.Models.Watch>
             {
@@ -85,7 +98,8 @@ namespace Watch.WebApi.Controllers
         [Authorize(Roles = UserRoles.Manager)]
         public async Task<Result<Watch.DataAccess.UI.Models.Watch?>> Update([FromBody] Watch.DataAccess.UI.Models.Watch watch)
         {
-            if(watch.Available == 0)
+            await _cacheService.RemoveData("watches");
+            if (watch.Available == 0)
             {
                 watch.OnSale = false;
             }
@@ -103,6 +117,7 @@ namespace Watch.WebApi.Controllers
         [Authorize(Roles = UserRoles.Manager)]
         public async Task<Result<bool>> Delete(int id)
         {
+            await _cacheService.RemoveData("watches");
             var res = await _context.Watches.SoftDeleteAsync(id);
             return new Result<bool>
             {
@@ -117,6 +132,7 @@ namespace Watch.WebApi.Controllers
         [Authorize(Roles = UserRoles.Manager)]
         public async Task<Result<bool>> Restore(int id)
         {
+            await _cacheService.RemoveData("watches");
             var res = await _context.Watches.RestoreAsync(id);
             return new Result<bool>
             {

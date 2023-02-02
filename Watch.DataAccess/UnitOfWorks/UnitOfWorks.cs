@@ -42,7 +42,7 @@ namespace Watch.DataAccess.UnitOfWorks
         {
             foreach (var detail in basket.Details)
             {
-                var watch = _db.Watches.FirstOrDefault(w => w.Id == basket.Id);
+                var watch = _db.Watches.FirstOrDefault(w => w.Id == detail.WatchId);
                 if (watch == null || watch.Available < detail.Count || watch.OnSale == false)
                 {
                     return null;

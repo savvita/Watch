@@ -7,6 +7,8 @@ using Watch.DataAccess;
 using Watch.DataAccess.UI.Models;
 using Watch.Domain.Models;
 using Watch.WebApi;
+using Watch.WebApi.Cache;
+using ConfigurationManager = Watch.WebApi.ConfigurationManager;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -16,6 +18,9 @@ builder.Services.AddControllers(options =>
 {
     options.Filters.Add<AppExceptionFilter>();
 });
+
+builder.Services.AddControllers().AddNewtonsoftJson();
+
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
@@ -71,6 +76,8 @@ builder.Services.AddAuthentication(options =>
         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JWT:Secret"]))
     };
 });
+
+builder.Services.AddScoped<ICacheService, CacheService>();
 
 var app = builder.Build();
 

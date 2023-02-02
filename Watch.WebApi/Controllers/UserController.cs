@@ -68,10 +68,10 @@ namespace Watch.WebApi.Controllers
                 throw new UserNotFoundException(user.UserName);
             }
 
-            if(await _userManager.FindByNameAsync(user.UserName) != null)
-            {
-                throw new ConflictException();
-            }
+            //if(await _userManager.FindByNameAsync(user.UserName) != null)
+            //{
+            //    throw new ConflictException();
+            //}
 
             model.UserName = user.UserName;
             model.Email = user.Email;

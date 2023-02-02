@@ -23,42 +23,37 @@ namespace Watch.WebApi.Controllers
             _configuration = configuration;
         }
 
-        [HttpGet("")]
-        [Authorize(Roles = UserRoles.Manager)]
-        public async Task<Result<List<Basket>>> Get()
+        [HttpGet("")]      
+        public async Task<Result<Basket>> Get()
         {
-            var baskets = (await _context.Baskets.GetAsync()).ToList();
-            return new Result<List<Basket>>
+            var usernameClaim = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Name);
+
+            if(usernameClaim == null)
             {
-                Value = baskets,
-                Hits = baskets.Count,
+                throw new InternalServerException();
+            }
+
+            var user = await _context.Users.GetByUserNameAsync(usernameClaim.Value);
+
+            if(user == null)
+            {
+                throw new UserNotFoundException(usernameClaim.Value);
+            }
+
+            var basket = await _context.Baskets.GetByUserIdAsync(user.Id);
+            return new Result<Basket>
+            {
+                Value = basket,
+                Hits = basket != null ? 1 : 0,
                 Token = new JwtSecurityTokenHandler().WriteToken(JwtHelper.GetToken(User.Claims, _configuration))
             };
         }
 
         [HttpGet("{userId}")]
+        [Authorize(Roles = UserRoles.Manager)]
         public async Task<Result<Basket?>> Get(string userId)
         {
-            var username = User.FindFirst(c => c.Type == ClaimTypes.Name);
-
-            if (username == null)
-            {
-                throw new InternalServerException();
-            }
-
-            var user = await _context.Users.GetByUserNameAsync(username.Value);
-
-            if (user == null)
-            {
-                throw new UserNotFoundException(userId);
-            }
-
             var res = await _context.Baskets.GetByUserIdAsync(userId);
-
-            if(res != null && res.UserId != user.Id && !User.IsInRole(UserRoles.Manager))
-            {
-                throw new ForbiddenException();
-            }
 
             return new Result<Basket?>
             {
@@ -68,10 +63,54 @@ namespace Watch.WebApi.Controllers
             };
         }
 
+        //[HttpPost("")]
+        //public async Task<Result<Basket>> Create([FromBody] Basket basket)
+        //{
+        //    var res = await _context.Baskets.CreateAsync(basket);
+        //    return new Result<Basket>
+        //    {
+        //        Value = res,
+        //        Hits = res != null ? 1 : 0,
+        //        Token = new JwtSecurityTokenHandler().WriteToken(JwtHelper.GetToken(User.Claims, _configuration))
+        //    };
+        //}
+
         [HttpPost("")]
-        public async Task<Result<Basket>> Create([FromBody] Basket basket)
+        public async Task<Result<Basket>> Create([FromBody] BasketDetail detail)
         {
-            var res = await _context.Baskets.CreateAsync(basket);
+            var usernameClaim = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Name);
+
+            if (usernameClaim == null)
+            {
+                throw new InternalServerException();
+            }
+
+            var user = await _context.Users.GetByUserNameAsync(usernameClaim.Value);
+
+            if (user == null)
+            {
+                throw new UserNotFoundException(usernameClaim.Value);
+            }
+
+            var basket = await _context.Baskets.GetByUserIdAsync(user.Id);
+
+            if(basket == null)
+            {
+                basket = await _context.Baskets.CreateAsync(new Basket()
+                {
+                    Date = DateTime.Now,
+                    UserId = user.Id
+                });
+
+                if(basket == null)
+                {
+                    throw new InternalServerException();
+                }
+            }
+            detail.BasketId = basket.Id;
+            basket.Details.Add(detail);
+
+            var res = await _context.Baskets.UpdateAsync(basket);
             return new Result<Basket>
             {
                 Value = res,
@@ -80,39 +119,39 @@ namespace Watch.WebApi.Controllers
             };
         }
 
+        //[HttpPut("")]
+        //public async Task<Result<Basket?>> Update([FromBody] Basket basket)
+        //{
+        //    var username = User.FindFirst(c => c.Type == ClaimTypes.Name);
+
+        //    if (username == null)
+        //    {
+        //        throw new InternalServerException();
+        //    }
+
+        //    var user = await _context.Users.GetByUserNameAsync(username.Value);
+
+        //    if (user == null)
+        //    {
+        //        throw new UserNotFoundException(username.Value);
+        //    }
+
+        //    var res = await _context.Baskets.GetByUserIdAsync(user.Id);
+
+        //    if (res != null && res.UserId != user.Id && !User.IsInRole(UserRoles.Manager))
+        //    {
+        //        throw new ForbiddenException();
+        //    }
+        //    return new Result<Basket?>
+        //    {
+        //        Value = await _context.Baskets.UpdateAsync(basket),
+        //        Hits = 1,
+        //        Token = new JwtSecurityTokenHandler().WriteToken(JwtHelper.GetToken(User.Claims, _configuration))
+        //    };
+        //}
+
         [HttpPut("")]
-        public async Task<Result<Basket?>> Update([FromBody] Basket basket)
-        {
-            var username = User.FindFirst(c => c.Type == ClaimTypes.Name);
-
-            if (username == null)
-            {
-                throw new InternalServerException();
-            }
-
-            var user = await _context.Users.GetByUserNameAsync(username.Value);
-
-            if (user == null)
-            {
-                throw new UserNotFoundException(username.Value);
-            }
-
-            var res = await _context.Baskets.GetByUserIdAsync(user.Id);
-
-            if (res != null && res.UserId != user.Id && !User.IsInRole(UserRoles.Manager))
-            {
-                throw new ForbiddenException();
-            }
-            return new Result<Basket?>
-            {
-                Value = await _context.Baskets.UpdateAsync(basket),
-                Hits = 1,
-                Token = new JwtSecurityTokenHandler().WriteToken(JwtHelper.GetToken(User.Claims, _configuration))
-            };
-        }
-
-        [HttpDelete("{id:int}")]
-        public async Task<Result<bool>> Delete(int id)
+        public async Task<Result<Basket?>> Update([FromBody] List<BasketDetail> details)
         {
             var username = User.FindFirst(c => c.Type == ClaimTypes.Name);
 
@@ -130,11 +169,58 @@ namespace Watch.WebApi.Controllers
 
             var basket = await _context.Baskets.GetByUserIdAsync(user.Id);
 
-            if (basket != null && basket.UserId != user.Id && !User.IsInRole(UserRoles.Manager))
+            if(basket == null)
             {
-                throw new ForbiddenException();
+                throw new InternalServerException();
             }
 
+            basket.Details = details;
+
+            return new Result<Basket?>
+            {
+                Value = await _context.Baskets.UpdateAsync(basket),
+                Hits = 1,
+                Token = new JwtSecurityTokenHandler().WriteToken(JwtHelper.GetToken(User.Claims, _configuration))
+            };
+        }
+
+        [HttpDelete("")]
+        public async Task<Result<bool>> Delete()
+        {
+            var username = User.FindFirst(c => c.Type == ClaimTypes.Name);
+
+            if (username == null)
+            {
+                throw new InternalServerException();
+            }
+
+            var user = await _context.Users.GetByUserNameAsync(username.Value);
+
+            if (user == null)
+            {
+                throw new UserNotFoundException(username.Value);
+            }
+
+            var basket = await _context.Baskets.GetByUserIdAsync(user.Id);
+
+            if (basket == null)
+            {
+                throw new InternalServerException();
+            }
+
+            var res = await _context.Baskets.DeleteAsync(basket.Id);
+            return new Result<bool>
+            {
+                Value = res,
+                Hits = res == true ? 1 : 0,
+                Token = new JwtSecurityTokenHandler().WriteToken(JwtHelper.GetToken(User.Claims, _configuration))
+            };
+        }
+
+        [HttpDelete("{id:int}")]
+        [Authorize(Roles = UserRoles.Manager)]
+        public async Task<Result<bool>> Delete(int id)
+        {
             var res = await _context.Baskets.DeleteAsync(id);
             return new Result<bool>
             {

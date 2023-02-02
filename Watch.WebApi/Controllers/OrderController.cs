@@ -23,10 +23,44 @@ namespace Watch.WebApi.Controllers
         }
 
         [HttpGet("")]
-        [Authorize(Roles = $"{UserRoles.Admin},{UserRoles.Manager}")]
+        [Authorize]
         public async Task<Result<List<Order>>> Get()
         {
             var orders = (await _context.Orders.GetAsync()).ToList();
+
+            if(User.IsInRole(UserRoles.User))
+            {
+                var username = User.FindFirst(c => c.Type == ClaimTypes.Name);
+
+                if (username == null)
+                {
+                    throw new InternalServerException();
+                }
+
+                var user = await _context.Users.GetByUserNameAsync(username.Value);
+
+                if (user == null)
+                {
+                    throw new UserNotFoundException(username.Value);
+                }
+
+                orders = orders.Where(o => o.UserId == user.Id).ToList();
+            }
+
+            return new Result<List<Order>>
+            {
+                Value = orders,
+                Hits = orders.Count,
+                Token = new JwtSecurityTokenHandler().WriteToken(JwtHelper.GetToken(User.Claims, _configuration))
+            };
+        }
+
+        [HttpGet("all")]
+        [Authorize(Roles = UserRoles.Manager)]
+        public async Task<Result<List<Order>>> GetAll()
+        {
+            var orders = (await _context.Orders.GetAsync()).ToList();
+
             return new Result<List<Order>>
             {
                 Value = orders,
@@ -70,22 +104,66 @@ namespace Watch.WebApi.Controllers
 
         [HttpGet("{id:int}")]
         //[Authorize(Roles = $"{UserRoles.Admin},{UserRoles.Manager}")]
-        [Authorize(Roles = UserRoles.Manager)]
+        [Authorize]
         public async Task<Result<Order?>> Get(int id)
         {
-            var res = await _context.Orders.GetAsync(id);
+            var username = User.FindFirst(c => c.Type == ClaimTypes.Name);
+
+            if (username == null)
+            {
+                throw new InternalServerException();
+            }
+
+            var user = await _context.Users.GetByUserNameAsync(username.Value);
+
+            if (user == null)
+            {
+                throw new UserNotFoundException(username.Value);
+            }
+            var order = await _context.Orders.GetAsync(id);
+
+            if(order == null)
+            {
+                throw new InternalServerException();
+            }
+
+            if (user.Id != order.UserId && !User.IsInRole(UserRoles.Manager))
+            {
+                throw new ForbiddenException();
+            }
             return new Result<Order?>
             {
-                Value = res,
-                Hits = res != null ? 1 : 0,
+                Value = order,
+                Hits = order != null ? 1 : 0,
                 Token = new JwtSecurityTokenHandler().WriteToken(JwtHelper.GetToken(User.Claims, _configuration))
             };
         }
 
         [HttpPost("")]
         [Authorize]
-        public async Task<Result<Order>> Create([FromBody] Basket basket)
+        public async Task<Result<Order>> Create()
         {
+            var username = User.FindFirst(c => c.Type == ClaimTypes.Name);
+
+            if (username == null)
+            {
+                throw new InternalServerException();
+            }
+
+            var user = await _context.Users.GetByUserNameAsync(username.Value);
+
+            if (user == null)
+            {
+                throw new UserNotFoundException(username.Value);
+            }
+
+            var basket = await _context.Baskets.GetByUserIdAsync(user.Id);
+
+            if(basket == null)
+            {
+                throw new InternalServerException();
+            }
+
             var res = await _context.Orders.CreateAsync(basket);
             return new Result<Order>
             {
@@ -97,9 +175,27 @@ namespace Watch.WebApi.Controllers
 
         [HttpPut("")]
         //[Authorize(Roles = $"{UserRoles.Admin},{UserRoles.Manager}")]
-        [Authorize(Roles = UserRoles.Manager)]
+        [Authorize]
         public async Task<Result<Order?>> Update([FromBody] Order order)
         {
+            var username = User.FindFirst(c => c.Type == ClaimTypes.Name);
+
+            if (username == null)
+            {
+                throw new InternalServerException();
+            }
+
+            var user = await _context.Users.GetByUserNameAsync(username.Value);
+
+            if (user == null)
+            {
+                throw new UserNotFoundException(username.Value);
+            }
+
+            if (user.Id != order.UserId && !User.IsInRole(UserRoles.Manager))
+            {
+                throw new ForbiddenException();
+            }
             return new Result<Order?>
             {
                 Value = await _context.Orders.UpdateAsync(order),
@@ -113,7 +209,7 @@ namespace Watch.WebApi.Controllers
         [Authorize(Roles = UserRoles.Manager)]
         public async Task<Result<bool>> Delete(int id)
         {
-            var res = await _context.Orders.DeleteAsync(id);
+            var res = await _context.Orders.CloseOrderAsync(id);
             return new Result<bool>
             {
                 Value = res,

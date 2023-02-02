@@ -15,32 +15,33 @@ namespace Watch.WebApi.Controllers
     {
         private readonly DbContext _context;
         private readonly IConfiguration _configuration;
-        private readonly ICacheService _cacheService;
-        public WatchController(WatchDbContext context, IConfiguration configuration, ICacheService cacheService)
+        //private readonly ICacheService _cacheService;
+        public WatchController(WatchDbContext context, IConfiguration configuration)
         {
             _context = new DbContext(context);
             _configuration = configuration;
-            _cacheService = cacheService;
+            //_cacheService = cacheService;
         }
 
         [HttpGet("")]
         public async Task<Result<List<Watch.DataAccess.UI.Models.Watch>>> Get()
         {
-            var cached = await _cacheService.GetData<List<Watch.DataAccess.UI.Models.Watch>>("watches");
+            //var cached = await _cacheService.GetData<List<Watch.DataAccess.UI.Models.Watch>>("watches");
 
-            if(cached == null)
-            {
-                var watches = (await _context.Watches.GetAsync()).ToList();
-                if (watches.Count > 0)
-                {
-                    await _cacheService.SetData("watches", watches, DateTimeOffset.Now.AddDays(1));
-                    cached = watches;
-                }
-            }
+            //if(cached == null)
+            //{
+            //    var watches = (await _context.Watches.GetAsync()).ToList();
+            //    if (watches.Count > 0)
+            //    {
+            //        await _cacheService.SetData("watches", watches, DateTimeOffset.Now.AddDays(1));
+            //        cached = watches;
+            //    }
+            //}
+            var watches = (await _context.Watches.GetAsync()).ToList();
             return new Result<List<Watch.DataAccess.UI.Models.Watch>>
             {
-                Value = cached,
-                Hits = cached == null ? 0 : cached.Count,
+                Value = watches,
+                Hits = watches == null ? 0 : watches.Count,
                 Token = User.Claims.Count() > 0 ? new JwtSecurityTokenHandler().WriteToken(JwtHelper.GetToken(User.Claims, _configuration)) : null
             };
         }
@@ -79,11 +80,10 @@ namespace Watch.WebApi.Controllers
         }
 
         [HttpPost("")]
-        //[Authorize(Roles = $"{UserRoles.Admin},{UserRoles.Manager}")]
         [Authorize(Roles = UserRoles.Manager)]
         public async Task<Result<Watch.DataAccess.UI.Models.Watch>> Create([FromBody] Watch.DataAccess.UI.Models.Watch watch)
         {
-            await _cacheService.RemoveData("watches");
+            //await _cacheService.RemoveData("watches");
             var res = await _context.Watches.CreateAsync(watch);
             return new Result<Watch.DataAccess.UI.Models.Watch>
             {
@@ -94,11 +94,10 @@ namespace Watch.WebApi.Controllers
         }
 
         [HttpPut("")]
-        //[Authorize(Roles = $"{UserRoles.Admin},{UserRoles.Manager}")]
         [Authorize(Roles = UserRoles.Manager)]
         public async Task<Result<Watch.DataAccess.UI.Models.Watch?>> Update([FromBody] Watch.DataAccess.UI.Models.Watch watch)
         {
-            await _cacheService.RemoveData("watches");
+            //await _cacheService.RemoveData("watches");
             if (watch.Available == 0)
             {
                 watch.OnSale = false;
@@ -113,11 +112,10 @@ namespace Watch.WebApi.Controllers
         }
 
         [HttpDelete("{id:int}")]
-        //[Authorize(Roles = $"{UserRoles.Admin},{UserRoles.Manager}")]
         [Authorize(Roles = UserRoles.Manager)]
         public async Task<Result<bool>> Delete(int id)
         {
-            await _cacheService.RemoveData("watches");
+            //await _cacheService.RemoveData("watches");
             var res = await _context.Watches.SoftDeleteAsync(id);
             return new Result<bool>
             {
@@ -128,11 +126,10 @@ namespace Watch.WebApi.Controllers
         }
 
         [HttpPut("restore/{id:int}")]
-        //[Authorize(Roles = $"{UserRoles.Admin},{UserRoles.Manager}")]
         [Authorize(Roles = UserRoles.Manager)]
         public async Task<Result<bool>> Restore(int id)
         {
-            await _cacheService.RemoveData("watches");
+            //await _cacheService.RemoveData("watches");
             var res = await _context.Watches.RestoreAsync(id);
             return new Result<bool>
             {

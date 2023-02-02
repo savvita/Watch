@@ -61,6 +61,16 @@ namespace Watch.WebApi
                         StatusCode = (int)HttpStatusCode.NotFound
                     };
                 }
+                else if (context.Exception is BasketNotFoundException)
+                {
+                    context.Result = new ObjectResult(new
+                    {
+                        code = "basket-not-found"
+                    })
+                    {
+                        StatusCode = (int)HttpStatusCode.NotFound
+                    };
+                }
                 else
                 {
                     context.Result = new ObjectResult(new

@@ -161,7 +161,7 @@ namespace Watch.WebApi.Controllers
 
             if(basket == null)
             {
-                throw new InternalServerException();
+                throw new BasketNotFoundException();
             }
 
             var res = await _context.Orders.CreateAsync(basket);

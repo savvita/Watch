@@ -1,10 +1,12 @@
 ﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using System.IdentityModel.Tokens.Jwt;
 using Watch.DataAccess;
 using Watch.DataAccess.UI;
 using Watch.DataAccess.UI.Models;
-using Watch.DataAccess.UI.Roles;
+using Watch.Domain.Models;
+using Watch.Domain.Roles;
 using Watch.WebApi.Cache;
 
 namespace Watch.WebApi.Controllers
@@ -16,9 +18,9 @@ namespace Watch.WebApi.Controllers
         private readonly DbContext _context;
         private readonly IConfiguration _configuration;
         //private readonly ICacheService _cacheService;
-        public WatchController(WatchDbContext context, IConfiguration configuration)
+        public WatchController(WatchDbContext context, IConfiguration configuration, UserManager<UserModel> userManager, RoleManager<IdentityRole> roleManager)
         {
-            _context = new DbContext(context);
+            _context = new DbContext(context, userManager, roleManager);
             _configuration = configuration;
             //_cacheService = cacheService;
         }

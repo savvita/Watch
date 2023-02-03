@@ -1,4 +1,4 @@
-﻿namespace Watch.WebApi.Exceptions
+﻿namespace Watch.DataAccess.UI.Exceptions
 {
     public class ForbiddenException : Exception
     {

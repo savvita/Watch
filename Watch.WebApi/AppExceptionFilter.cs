@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using System.Net;
-using Watch.WebApi.Exceptions;
+using Watch.DataAccess.UI.Exceptions;
 
 namespace Watch.WebApi
 {

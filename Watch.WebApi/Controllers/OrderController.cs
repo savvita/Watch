@@ -1,12 +1,14 @@
 ﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using Watch.DataAccess;
 using Watch.DataAccess.UI;
+using Watch.DataAccess.UI.Exceptions;
 using Watch.DataAccess.UI.Models;
-using Watch.DataAccess.UI.Roles;
-using Watch.WebApi.Exceptions;
+using Watch.Domain.Models;
+using Watch.Domain.Roles;
 
 namespace Watch.WebApi.Controllers
 {
@@ -16,9 +18,9 @@ namespace Watch.WebApi.Controllers
     {
         private readonly DbContext _context;
         private readonly IConfiguration _configuration;
-        public OrderController(WatchDbContext context, IConfiguration configuration)
+        public OrderController(WatchDbContext context, IConfiguration configuration, UserManager<UserModel> userManager, RoleManager<IdentityRole> roleManager)
         {
-            _context = new DbContext(context);
+            _context = new DbContext(context, userManager, roleManager);
             _configuration = configuration;
         }
 
@@ -173,10 +175,26 @@ namespace Watch.WebApi.Controllers
             };
         }
 
-        [HttpPut("")]
-        //[Authorize(Roles = $"{UserRoles.Admin},{UserRoles.Manager}")]
+
+        //Close order
+        [HttpPut("{id:int}")]
+        [Authorize(Roles = UserRoles.Manager)]
+        public async Task<Result<bool>> Update(int id)
+        {
+            var res = await _context.Orders.CloseOrderAsync(id);
+            return new Result<bool>
+            {
+                Value = res,
+                Hits = res == true ? 1 : 0,
+                Token = new JwtSecurityTokenHandler().WriteToken(JwtHelper.GetToken(User.Claims, _configuration))
+            };
+        }
+
+
+        //Cancel order
+        [HttpDelete("{id:int}")]
         [Authorize]
-        public async Task<Result<Order?>> Update([FromBody] Order order)
+        public async Task<Result<bool>> Delete(int id)
         {
             var username = User.FindFirst(c => c.Type == ClaimTypes.Name);
 
@@ -192,24 +210,19 @@ namespace Watch.WebApi.Controllers
                 throw new UserNotFoundException(username.Value);
             }
 
+            var order = await _context.Orders.GetAsync(id);
+            if(order == null)
+            {
+                throw new OrderNotFoundException(id);
+            }
+
             if (user.Id != order.UserId && !User.IsInRole(UserRoles.Manager))
             {
                 throw new ForbiddenException();
             }
-            return new Result<Order?>
-            {
-                Value = await _context.Orders.UpdateAsync(order),
-                Hits = 1,
-                Token = new JwtSecurityTokenHandler().WriteToken(JwtHelper.GetToken(User.Claims, _configuration))
-            };
-        }
 
-        [HttpDelete("{id:int}")]
-        //[Authorize(Roles = $"{UserRoles.Admin},{UserRoles.Manager}")]
-        [Authorize(Roles = UserRoles.Manager)]
-        public async Task<Result<bool>> Delete(int id)
-        {
-            var res = await _context.Orders.CloseOrderAsync(id);
+            var res = await _context.Orders.CancelOrderAsync(id);
+
             return new Result<bool>
             {
                 Value = res,

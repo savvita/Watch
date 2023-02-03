@@ -1,4 +1,5 @@
-﻿using Watch.DataAccess.Repositories;
+﻿using Microsoft.AspNetCore.Identity;
+using Watch.DataAccess.Repositories;
 using Watch.Domain.Interfaces;
 using Watch.Domain.Models;
 
@@ -17,7 +18,10 @@ namespace Watch.DataAccess.UnitOfWorks
         public IWatchRepository Watches { get; }
         public IOrderStatusRepository OrderStatuses { get; }
 
-        public UnitOfWorks(WatchDbContext context)
+        public UserManager<UserModel> UserManager { get; }
+        public RoleManager<IdentityRole> Roles { get; }
+
+        public UnitOfWorks(WatchDbContext context, UserManager<UserModel> userManager, RoleManager<IdentityRole> roleManager)
         {
             _db = context;
             Categories = new CategoryRepository(context);
@@ -29,6 +33,8 @@ namespace Watch.DataAccess.UnitOfWorks
             Users = new UserRepository(context);
             Watches = new WatchRepository(context);
             OrderStatuses = new OrderStatusRepository(context);
+            UserManager = userManager;
+            Roles = roleManager;
         }
 
         public async void Dispose()
@@ -36,7 +42,6 @@ namespace Watch.DataAccess.UnitOfWorks
             await _db.SaveChangesAsync();
             _db.Dispose();
         }
-
 
         public async Task<OrderModel?> CreateOrderAsync(BasketModel basket)
         {
@@ -63,7 +68,7 @@ namespace Watch.DataAccess.UnitOfWorks
 
             foreach (var detail in basket.Details)
             {
-                var watch = _db.Watches.FirstOrDefault(w => w.Id == basket.Id);
+                var watch = _db.Watches.FirstOrDefault(w => w.Id == detail.WatchId);
                 if (watch == null || watch.Available < detail.Count)
                 {
                     return null;
@@ -100,6 +105,33 @@ namespace Watch.DataAccess.UnitOfWorks
             await Baskets.DeleteAsync(basket.Id);
 
             return order;
+        }
+
+        public async Task<bool> CancelOrderAsync(int orderId)
+        {
+            var order = _db.Orders.FirstOrDefault(o => o.Id == orderId);
+            if(order == null || order.StatusId == 3 || order.StatusId == 4)
+            {
+                return false;
+            }
+
+            foreach(var detail in order.Details)
+            {
+                var watch = _db.Watches.FirstOrDefault(w => w.Id == detail.WatchId);
+                if(watch == null)
+                {
+                    continue;
+                }
+
+                watch.Available += detail.Count;
+                watch.Sold -= detail.Count;
+            }
+
+            order.StatusId = 4;
+
+            await _db.SaveChangesAsync();
+
+            return true;
         }
     }
 }

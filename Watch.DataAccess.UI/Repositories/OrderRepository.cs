@@ -1,4 +1,5 @@
-﻿using Watch.DataAccess.UI.Interfaces;
+﻿using Microsoft.AspNetCore.Identity;
+using Watch.DataAccess.UI.Interfaces;
 using Watch.DataAccess.UI.Models;
 using Watch.Domain.Models;
 
@@ -7,9 +8,9 @@ namespace Watch.DataAccess.UI.Repositories
     public class OrderRepository : IOrderRepository
     {
         private readonly UnitOfWorks.UnitOfWorks _db;
-        public OrderRepository(WatchDbContext context)
+        public OrderRepository(WatchDbContext context, UserManager<UserModel> userManager, RoleManager<IdentityRole> roleManager)
         {
-            _db = new UnitOfWorks.UnitOfWorks(context);
+            _db = new UnitOfWorks.UnitOfWorks(context, userManager, roleManager);
         }
 
         public Task<bool> CloseOrderAsync(int id)
@@ -31,11 +32,6 @@ namespace Watch.DataAccess.UI.Repositories
 
         public async Task<bool> DeleteAsync(int id)
         {
-            (await _db.OrderDetails.GetAsync())
-                .Where(detail => detail.OrderId == id)
-                .ToList()
-                .ForEach(async (detail) => await _db.OrderDetails.DeleteAsync(detail.Id));
-
             return await _db.Orders.DeleteAsync(id);
         }
 
@@ -102,6 +98,11 @@ namespace Watch.DataAccess.UI.Repositories
             var model = await _db.Orders.UpdateAsync((OrderModel)entity);
 
             return new Order(model);
+        }
+
+        public async Task<bool> CancelOrderAsync(int orderId)
+        {
+            return await _db.CancelOrderAsync(orderId);
         }
     }
 }

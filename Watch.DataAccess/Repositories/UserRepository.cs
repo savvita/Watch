@@ -1,4 +1,5 @@
-﻿using Watch.Domain.Interfaces;
+﻿using Microsoft.AspNetCore.Identity;
+using Watch.Domain.Interfaces;
 using Watch.Domain.Models;
 
 namespace Watch.DataAccess.Repositories

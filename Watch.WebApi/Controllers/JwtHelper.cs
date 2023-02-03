@@ -2,7 +2,7 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
-using Watch.WebApi.Exceptions;
+using Watch.DataAccess.UI.Exceptions;
 
 namespace Watch.WebApi.Controllers
 {

@@ -1,4 +1,4 @@
-﻿namespace Watch.DataAccess.UI.Roles
+﻿namespace Watch.Domain.Roles
 {
     public static class UserRoles
     {

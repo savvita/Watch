@@ -1,10 +1,12 @@
 ﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using System.IdentityModel.Tokens.Jwt;
 using Watch.DataAccess;
 using Watch.DataAccess.UI;
 using Watch.DataAccess.UI.Models;
-using Watch.DataAccess.UI.Roles;
+using Watch.Domain.Models;
+using Watch.Domain.Roles;
 
 namespace Watch.WebApi.Controllers
 {
@@ -14,9 +16,9 @@ namespace Watch.WebApi.Controllers
     {
         private readonly DbContext _context;
         private readonly IConfiguration _configuration;
-        public ProducerController(WatchDbContext context, IConfiguration configuration)
+        public ProducerController(WatchDbContext context, IConfiguration configuration, UserManager<UserModel> userManager, RoleManager<IdentityRole> roleManager)
         {
-            _context = new DbContext(context);
+            _context = new DbContext(context, userManager, roleManager);
             _configuration = configuration;
         }
 
@@ -47,7 +49,6 @@ namespace Watch.WebApi.Controllers
         }
 
         [HttpPost("")]
-        //[Authorize(Roles = $"{UserRoles.Admin},{UserRoles.Manager}")]
         [Authorize(Roles = UserRoles.Manager)]
         public async Task<Result<Producer>> Create([FromBody] Producer producer)
         {

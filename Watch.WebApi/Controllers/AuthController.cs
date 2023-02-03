@@ -1,14 +1,14 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
-using System.Text;
+using Watch.DataAccess;
+using Watch.DataAccess.UI;
+using Watch.DataAccess.UI.Exceptions;
 using Watch.DataAccess.UI.Models;
-using Watch.DataAccess.UI.Roles;
 using Watch.Domain.Models;
-using Watch.WebApi.Exceptions;
+using Watch.Domain.Roles;
 
 namespace Watch.WebApi.Controllers
 {
@@ -16,24 +16,23 @@ namespace Watch.WebApi.Controllers
     [Route("api/auth")]
     public class AuthController : ControllerBase
     {
+        private readonly DbContext _context;
         private readonly IConfiguration _configuration;
-        private readonly RoleManager<IdentityRole> _roleManager;
-        private readonly UserManager<UserModel> _userManager;
-        public AuthController(IConfiguration configuration, UserManager<UserModel> userManager, RoleManager<IdentityRole> roleManager)
+
+        public AuthController(WatchDbContext context, IConfiguration configuration, UserManager<UserModel> userManager, RoleManager<IdentityRole> roleManager)
         {
+            _context = new DbContext(context, userManager, roleManager);
             _configuration = configuration;
-            _userManager = userManager;
-            _roleManager = roleManager;
         }
 
         [HttpPost("")]
         public async Task<Result<string>> Login([FromBody] LoginModel model)
         {
-            var user = await _userManager.FindByNameAsync(model.UserName);
+            var user = await _context.Users.CheckCredentialsAsync(model);
 
-            if (user != null && await _userManager.CheckPasswordAsync(user, model.Password))
+            if (user != null)
             {
-                var roles = (await _userManager.GetRolesAsync(user)).ToList();
+                var roles = (await _context.Users.GetRolesAsync(user)).ToList();
 
                 var claims = new List<Claim>
                 {
@@ -58,29 +57,7 @@ namespace Watch.WebApi.Controllers
         [HttpPost("user")]
         public async Task<Result<string>> Register([FromBody] RegisterModel model)
         {
-            var user = await _userManager.FindByNameAsync(model.UserName);
-
-            if (user != null)
-            {
-                throw new ConflictException();
-            }
-
-            UserModel iUser = new UserModel()
-            {
-                UserName = model.UserName,
-                Email = model.Email,
-                SecurityStamp = Guid.NewGuid().ToString()
-            };
-
-            var result = await _userManager.CreateAsync(iUser, model.Password);
-
-            if (!result.Succeeded)
-            {
-                throw new AuthorizationException();
-            }
-
-            if (await _roleManager.RoleExistsAsync(UserRoles.User))
-                await _userManager.AddToRoleAsync(iUser, UserRoles.User);
+            await _context.Users.CreateAsync(model, new List<string>() { UserRoles.User });
 
             var claims = new List<Claim>
                 {
@@ -102,42 +79,7 @@ namespace Watch.WebApi.Controllers
         [Authorize(Roles = UserRoles.Admin)]
         public async Task<Result<string>> RegisterManager([FromBody] RegisterModel model)
         {
-            var user = await _userManager.FindByNameAsync(model.UserName);
-
-            if (user != null)
-            {
-                throw new ConflictException();
-            }
-
-            UserModel iUser = new UserModel()
-            {
-                UserName = model.UserName,
-                Email = model.Email,
-                SecurityStamp = Guid.NewGuid().ToString()
-            };
-
-            var result = await _userManager.CreateAsync(iUser, model.Password);
-
-            if (!result.Succeeded)
-            {
-                throw new AuthorizationException();
-            }
-
-            if (!await _roleManager.RoleExistsAsync(UserRoles.User))
-            {
-                await _roleManager.CreateAsync(new IdentityRole(UserRoles.User));
-            }
-
-            if (!await _roleManager.RoleExistsAsync(UserRoles.Manager))
-            {
-                await _roleManager.CreateAsync(new IdentityRole(UserRoles.Manager));
-            }
-
-            if (await _roleManager.RoleExistsAsync(UserRoles.User))
-                await _userManager.AddToRoleAsync(iUser, UserRoles.User);
-
-            if (await _roleManager.RoleExistsAsync(UserRoles.Manager))
-                await _userManager.AddToRoleAsync(iUser, UserRoles.Manager);
+            await _context.Users.CreateAsync(model, new List<string>() { UserRoles.User, UserRoles.Manager });
 
             var claims = new List<Claim>
                 {
@@ -160,42 +102,7 @@ namespace Watch.WebApi.Controllers
         [Authorize(Roles = UserRoles.Admin)]
         public async Task<Result<string>> RegisterAdmin([FromBody] RegisterModel model)
         {
-            var user = await _userManager.FindByNameAsync(model.UserName);
-
-            if (user != null)
-            {
-                throw new ConflictException();
-            }
-
-            UserModel iUser = new UserModel()
-            {
-                UserName = model.UserName,
-                Email = model.Email,
-                SecurityStamp = Guid.NewGuid().ToString()
-            };
-
-            var result = await _userManager.CreateAsync(iUser, model.Password);
-
-            if (!result.Succeeded)
-            {
-                throw new AuthorizationException();
-            }
-
-            if (!await _roleManager.RoleExistsAsync(UserRoles.User))
-            {
-                await _roleManager.CreateAsync(new IdentityRole(UserRoles.User));
-            }
-
-            if (!await _roleManager.RoleExistsAsync(UserRoles.Admin))
-            {
-                await _roleManager.CreateAsync(new IdentityRole(UserRoles.Admin));
-            }
-
-            if (await _roleManager.RoleExistsAsync(UserRoles.User))
-                await _userManager.AddToRoleAsync(iUser, UserRoles.User);
-
-            if (await _roleManager.RoleExistsAsync(UserRoles.Admin))
-                await _userManager.AddToRoleAsync(iUser, UserRoles.Admin);
+            await _context.Users.CreateAsync(model, new List<string>() { UserRoles.User, UserRoles.Admin });
 
             var claims = new List<Claim>
                 {

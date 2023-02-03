@@ -1,4 +1,7 @@
-﻿namespace Watch.Domain.Interfaces
+﻿using Microsoft.AspNetCore.Identity;
+using Watch.Domain.Models;
+
+namespace Watch.Domain.Interfaces
 {
     public interface IUnitOfWorks : IDisposable
     {
@@ -9,5 +12,7 @@
         IUserRepository Users { get; }
         IWatchRepository Watches { get; }
         IOrderStatusRepository OrderStatuses { get; }
+        UserManager<UserModel> UserManager { get; }
+        RoleManager<IdentityRole> Roles { get; }
     }
 }

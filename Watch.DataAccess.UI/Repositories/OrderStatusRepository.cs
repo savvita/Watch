@@ -1,4 +1,5 @@
-﻿using Watch.DataAccess.UI.Interfaces;
+﻿using Microsoft.AspNetCore.Identity;
+using Watch.DataAccess.UI.Interfaces;
 using Watch.DataAccess.UI.Models;
 using Watch.Domain.Models;
 
@@ -7,9 +8,9 @@ namespace Watch.DataAccess.UI.Repositories
     public class OrderStatusRepository : IOrderStatusRepository
     {
         private readonly UnitOfWorks.UnitOfWorks _db;
-        public OrderStatusRepository(WatchDbContext context)
+        public OrderStatusRepository(WatchDbContext context, UserManager<UserModel> userManager, RoleManager<IdentityRole> roleManager)
         {
-            _db = new UnitOfWorks.UnitOfWorks(context);
+            _db = new UnitOfWorks.UnitOfWorks(context, userManager, roleManager);
         }
         public async Task<OrderStatus?> CreateAsync(OrderStatus entity)
         {

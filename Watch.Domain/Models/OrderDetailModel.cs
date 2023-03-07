@@ -8,5 +8,6 @@
         public int Count { get; set; }
         public decimal UnitPrice { get; set; }
         public virtual WatchModel? Watch { get; set; }
+        public virtual OrderModel? Order { get; set; }
     }
 }

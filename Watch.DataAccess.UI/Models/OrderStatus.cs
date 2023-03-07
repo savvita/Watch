@@ -1,5 +1,4 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using Watch.Domain.Models;
 
 namespace Watch.DataAccess.UI.Models
 {
@@ -8,8 +7,8 @@ namespace Watch.DataAccess.UI.Models
         public int Id { get; set; }
 
         [Required]
-        [StringLength(100)]
-        public string StatusName { get; set; } = null!;
+        [StringLength(50)]
+        public string Value { get; set; } = null!;
 
         public OrderStatus()
         {
@@ -18,15 +17,15 @@ namespace Watch.DataAccess.UI.Models
         public OrderStatus(OrderStatusModel model)
         {
             Id = model.Id;
-            StatusName = model.StatusName;
+            Value = model.Value;
         }
 
-        public static explicit operator OrderStatusModel(OrderStatus status)
+        public static explicit operator OrderStatusModel(OrderStatus entity)
         {
             return new OrderStatusModel()
             {
-                Id = status.Id,
-                StatusName = status.StatusName
+                Id = entity.Id,
+                Value = entity.Value
             };
         }
     }

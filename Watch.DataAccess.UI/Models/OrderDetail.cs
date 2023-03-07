@@ -1,6 +1,4 @@
-﻿using Watch.Domain.Models;
-
-namespace Watch.DataAccess.UI.Models
+﻿namespace Watch.DataAccess.UI.Models
 {
     public class OrderDetail
     {
@@ -26,15 +24,15 @@ namespace Watch.DataAccess.UI.Models
             Count = model.Count;
         }
 
-        public static explicit operator OrderDetailModel(OrderDetail detail)
+        public static explicit operator OrderDetailModel(OrderDetail entity)
         {
             return new OrderDetailModel()
             {
-                Id = detail.Id,
-                OrderId = detail.OrderId,
-                Count = detail.Count,
-                UnitPrice = detail.UnitPrice,
-                WatchId = detail.WatchId
+                Id = entity.Id,
+                OrderId = entity.OrderId,
+                Count = entity.Count,
+                UnitPrice = entity.UnitPrice,
+                WatchId = entity.WatchId
             };
         }
     }

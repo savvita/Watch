@@ -4,7 +4,6 @@
     {
         public BasketNotFoundException() : base("Basket not found")
         {
-
         }
     }
 }

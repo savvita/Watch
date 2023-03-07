@@ -10,5 +10,9 @@ namespace Watch.DataAccess.UI.Models
         public string Password { get; set; } = null!;
         [Required]
         public string Email { get; set; } = null!;
+
+        public string? FirstName { get; set; }
+        public string? SecondName { get; set; }
+        public string? LastName { get; set; }
     }
 }

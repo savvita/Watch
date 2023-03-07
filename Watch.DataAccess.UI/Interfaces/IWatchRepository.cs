@@ -2,15 +2,11 @@
 {
     public interface IWatchRepository : IGenericRepository<Watch.DataAccess.UI.Models.Watch>
     {
+        IWatchCounter Count { get; }
         Task<bool> SoftDeleteAsync(int id);
         Task<bool> RestoreAsync(int id);
+        Task<ConcurrencyUpdateResult<Models.Watch>> UpdateConcurrencyAsync(Models.Watch entity);
 
-        Task<IEnumerable<Watch.DataAccess.UI.Models.Watch>> GetAsync(string? model,
-                                                               List<int>? categoryIds = null,
-                                                               List<int>? producerIds = null,
-                                                               decimal? minPrice = null,
-                                                               decimal? maxPrice = null,
-                                                               bool? onSale = null,
-                                                               bool? isPopular = null);
+        Task<Result<IEnumerable<Watch.DataAccess.UI.Models.Watch>>> GetAsync(int page, int perPage, WatchFilter? filters = null);
     }
 }

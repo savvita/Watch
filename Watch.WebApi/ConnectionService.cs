@@ -14,7 +14,11 @@ namespace Watch.WebApi
         {
             lazyConnection = new Lazy<ConnectionMultiplexer>(() =>
             {
-                return ConnectionMultiplexer.Connect(ConfigurationManager.Configuration["RedisUrl"]);
+                if(ConfigurationManager.Configuration["RedisUrl"] == null)
+                {
+                    throw new ArgumentNullException();
+                }
+                return ConnectionMultiplexer.Connect(ConfigurationManager.Configuration["RedisUrl"]!);
             });
         }
     }

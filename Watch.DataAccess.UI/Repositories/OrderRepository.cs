@@ -1,21 +1,14 @@
-﻿using Microsoft.AspNetCore.Identity;
-using Watch.DataAccess.UI.Interfaces;
-using Watch.DataAccess.UI.Models;
-using Watch.Domain.Models;
+﻿using Watch.DataAccess.UI.Interfaces;
 
 namespace Watch.DataAccess.UI.Repositories
 {
     public class OrderRepository : IOrderRepository
     {
         private readonly UnitOfWorks.UnitOfWorks _db;
-        public OrderRepository(WatchDbContext context, UserManager<UserModel> userManager, RoleManager<IdentityRole> roleManager)
-        {
-            _db = new UnitOfWorks.UnitOfWorks(context, userManager, roleManager);
-        }
 
-        public Task<bool> CloseOrderAsync(int id)
+        public OrderRepository(UnitOfWorks.UnitOfWorks db)
         {
-            return _db.Orders.CloseOrderAsync(id);
+            _db = db;
         }
 
         public async Task<Order?> CreateAsync(Basket basket)
@@ -100,9 +93,37 @@ namespace Watch.DataAccess.UI.Repositories
             return new Order(model);
         }
 
+        public async Task<IEnumerable<Order>> GetByManagerIdAsync(string managerId)
+        {
+            var models = await _db.Orders.GetByManagerIdAsync(managerId);
+
+            List<Order> orders = new List<Order>();
+
+            foreach (var model in models)
+            {
+                var details = (await _db.OrderDetails.GetByOrderIdAsync(model.Id)).Select(model => new OrderDetail(model)).ToList();
+                orders.Add(new Order(model)
+                {
+                    Details = details
+                });
+            }
+
+            return orders;
+        }
+
+        public async Task<bool> SetOrderStatusAsync(int id, int statusId)
+        {
+            return await _db.Orders.SetOrderStatusAsync(id, statusId);
+        }
+
         public async Task<bool> CancelOrderAsync(int orderId)
         {
-            return await _db.CancelOrderAsync(orderId);
+            return await _db.Orders.SetOrderStatusAsync(orderId, 4);
+        }
+
+        public async Task<bool> CloseOrderAsync(int id)
+        {
+            return await _db.Orders.SetOrderStatusAsync(id, 3);
         }
     }
 }

@@ -25,60 +25,8 @@ namespace Watch.WebApi.Controllers
             _configuration = configuration;
         }
 
-        [HttpGet("")]      
+        [HttpGet("")]
         public async Task<Result<Basket>> Get()
-        {
-            var usernameClaim = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Name);
-
-            if(usernameClaim == null)
-            {
-                throw new InternalServerException();
-            }
-
-            var user = await _context.Users.GetByUserNameAsync(usernameClaim.Value);
-
-            if(user == null)
-            {
-                throw new UserNotFoundException(usernameClaim.Value);
-            }
-
-            var basket = await _context.Baskets.GetByUserIdAsync(user.Id);
-            return new Result<Basket>
-            {
-                Value = basket,
-                Hits = basket != null ? 1 : 0,
-                Token = new JwtSecurityTokenHandler().WriteToken(JwtHelper.GetToken(User.Claims, _configuration))
-            };
-        }
-
-        [HttpGet("{userId}")]
-        [Authorize(Roles = UserRoles.Manager)]
-        public async Task<Result<Basket?>> Get(string userId)
-        {
-            var res = await _context.Baskets.GetByUserIdAsync(userId);
-
-            return new Result<Basket?>
-            {
-                Value = res,
-                Hits = res != null ? 1 : 0,
-                Token = new JwtSecurityTokenHandler().WriteToken(JwtHelper.GetToken(User.Claims, _configuration))
-            };
-        }
-
-        //[HttpPost("")]
-        //public async Task<Result<Basket>> Create([FromBody] Basket basket)
-        //{
-        //    var res = await _context.Baskets.CreateAsync(basket);
-        //    return new Result<Basket>
-        //    {
-        //        Value = res,
-        //        Hits = res != null ? 1 : 0,
-        //        Token = new JwtSecurityTokenHandler().WriteToken(JwtHelper.GetToken(User.Claims, _configuration))
-        //    };
-        //}
-
-        [HttpPost("")]
-        public async Task<Result<Basket>> Create([FromBody] BasketDetail detail)
         {
             var usernameClaim = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Name);
 
@@ -96,30 +44,94 @@ namespace Watch.WebApi.Controllers
 
             var basket = await _context.Baskets.GetByUserIdAsync(user.Id);
 
-            if(basket == null)
+            if (basket == null)
             {
                 basket = await _context.Baskets.CreateAsync(new Basket()
                 {
-                    Date = DateTime.Now,
                     UserId = user.Id
                 });
 
-                if(basket == null)
+                if (basket == null)
                 {
                     throw new InternalServerException();
                 }
             }
-            detail.BasketId = basket.Id;
-            basket.Details.Add(detail);
 
-            var res = await _context.Baskets.UpdateAsync(basket);
             return new Result<Basket>
             {
-                Value = res,
-                Hits = res != null ? 1 : 0,
+                Value = basket,
+                Hits = 1,
                 Token = new JwtSecurityTokenHandler().WriteToken(JwtHelper.GetToken(User.Claims, _configuration))
             };
         }
+
+
+        //TODO delete comments
+
+        //[HttpPost("")]
+        //public async Task<Result<Basket>> Create([FromBody] Basket basket)
+        //{
+        //    var res = await _context.Baskets.CreateAsync(basket);
+        //    return new Result<Basket>
+        //    {
+        //        Value = res,
+        //        Hits = res != null ? 1 : 0,
+        //        Token = new JwtSecurityTokenHandler().WriteToken(JwtHelper.GetToken(User.Claims, _configuration))
+        //    };
+        //}
+
+        //[HttpPost("")]
+        //public async Task<Result<Basket>> Create([FromBody] BasketDetail detail)
+        //{
+        //    var usernameClaim = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Name);
+
+        //    if (usernameClaim == null)
+        //    {
+        //        throw new InternalServerException();
+        //    }
+
+        //    var user = await _context.Users.GetByUserNameAsync(usernameClaim.Value);
+
+        //    if (user == null)
+        //    {
+        //        throw new UserNotFoundException(usernameClaim.Value);
+        //    }
+
+        //    var basket = await _context.Baskets.GetByUserIdAsync(user.Id);
+
+        //    if(basket == null)
+        //    {
+        //        basket = await _context.Baskets.CreateAsync(new Basket()
+        //        {
+        //            UserId = user.Id
+        //        });
+
+        //        if(basket == null)
+        //        {
+        //            throw new InternalServerException();
+        //        }
+        //    }
+
+        //    var d = basket.Details.FirstOrDefault(x => x.WatchId == detail.WatchId);
+
+        //    if(d == null)
+        //    {
+        //        detail.BasketId = basket.Id;
+        //        basket.Details.Add(detail);
+        //    }
+        //    else
+        //    {
+        //        d.Count += detail.Count;
+        //    }         
+
+        //    var res = await _context.Baskets.UpdateAsync(basket);
+        //    return new Result<Basket>
+        //    {
+        //        Value = res,
+        //        Hits = res != null ? 1 : 0,
+        //        Token = new JwtSecurityTokenHandler().WriteToken(JwtHelper.GetToken(User.Claims, _configuration))
+        //    };
+        //}
 
         //[HttpPut("")]
         //public async Task<Result<Basket?>> Update([FromBody] Basket basket)
@@ -171,7 +183,7 @@ namespace Watch.WebApi.Controllers
 
             var basket = await _context.Baskets.GetByUserIdAsync(user.Id);
 
-            if(basket == null)
+            if (basket == null)
             {
                 throw new InternalServerException();
             }
@@ -187,7 +199,7 @@ namespace Watch.WebApi.Controllers
         }
 
         [HttpDelete("")]
-        public async Task<Result<bool>> Delete()
+        public async Task<Result<bool>> Clear() 
         {
             var username = User.FindFirst(c => c.Type == ClaimTypes.Name);
 
@@ -219,17 +231,52 @@ namespace Watch.WebApi.Controllers
             };
         }
 
-        [HttpDelete("{id:int}")]
-        [Authorize(Roles = UserRoles.Manager)]
-        public async Task<Result<bool>> Delete(int id)
-        {
-            var res = await _context.Baskets.DeleteAsync(id);
-            return new Result<bool>
-            {
-                Value = res,
-                Hits = res == true ? 1 : 0,
-                Token = new JwtSecurityTokenHandler().WriteToken(JwtHelper.GetToken(User.Claims, _configuration))
-            };
-        }
+        //TODO delete comments
+
+        //[HttpDelete("")]
+        //public async Task<Result<bool>> Delete()
+        //{
+        //    var username = User.FindFirst(c => c.Type == ClaimTypes.Name);
+
+        //    if (username == null)
+        //    {
+        //        throw new InternalServerException();
+        //    }
+
+        //    var user = await _context.Users.GetByUserNameAsync(username.Value);
+
+        //    if (user == null)
+        //    {
+        //        throw new UserNotFoundException(username.Value);
+        //    }
+
+        //    var basket = await _context.Baskets.GetByUserIdAsync(user.Id);
+
+        //    if (basket == null)
+        //    {
+        //        throw new InternalServerException();
+        //    }
+
+        //    var res = await _context.Baskets.DeleteAsync(basket.Id);
+        //    return new Result<bool>
+        //    {
+        //        Value = res,
+        //        Hits = res == true ? 1 : 0,
+        //        Token = new JwtSecurityTokenHandler().WriteToken(JwtHelper.GetToken(User.Claims, _configuration))
+        //    };
+        //}
+
+        //[HttpDelete("{id:int}")]
+        //[Authorize(Roles = UserRoles.Manager)]
+        //public async Task<Result<bool>> Delete(int id)
+        //{
+        //    var res = await _context.Baskets.DeleteAsync(id);
+        //    return new Result<bool>
+        //    {
+        //        Value = res,
+        //        Hits = res == true ? 1 : 0,
+        //        Token = new JwtSecurityTokenHandler().WriteToken(JwtHelper.GetToken(User.Claims, _configuration))
+        //    };
+        //}
     }
 }

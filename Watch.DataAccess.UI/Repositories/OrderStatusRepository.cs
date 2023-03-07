@@ -1,22 +1,20 @@
-﻿using Microsoft.AspNetCore.Identity;
-using Watch.DataAccess.UI.Interfaces;
-using Watch.DataAccess.UI.Models;
-using Watch.Domain.Models;
+﻿using Watch.DataAccess.UI.Interfaces;
 
 namespace Watch.DataAccess.UI.Repositories
 {
     public class OrderStatusRepository : IOrderStatusRepository
     {
         private readonly UnitOfWorks.UnitOfWorks _db;
-        public OrderStatusRepository(WatchDbContext context, UserManager<UserModel> userManager, RoleManager<IdentityRole> roleManager)
+        public OrderStatusRepository(UnitOfWorks.UnitOfWorks db)
         {
-            _db = new UnitOfWorks.UnitOfWorks(context, userManager, roleManager);
+            _db = db;
         }
+
         public async Task<OrderStatus?> CreateAsync(OrderStatus entity)
         {
             var model = await _db.OrderStatuses.CreateAsync((OrderStatusModel)entity);
-
             return model != null ? new OrderStatus(model) : null;
+
         }
 
         public async Task<bool> DeleteAsync(int id)

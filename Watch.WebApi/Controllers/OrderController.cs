@@ -24,43 +24,53 @@ namespace Watch.WebApi.Controllers
             _configuration = configuration;
         }
 
+        //TODO delete comments
+
+        //[HttpGet("")]
+        //[Authorize]
+        //public async Task<Result<List<Order>>> Get()
+        //{
+        //    await _context.Users.CheckUserAsync(User.Identity);
+
+        //    if(!User.IsInRole(UserRoles.User)) 
+        //    {
+        //        throw new ForbiddenException();
+        //    }
+
+        //    var username = User.FindFirst(c => c.Type == ClaimTypes.Name);
+
+        //    if (username == null)
+        //    {
+        //        throw new InternalServerException();
+        //    }
+
+        //    var user = await _context.Users.GetByUserNameAsync(username.Value);
+
+        //    if (user == null)
+        //    {
+        //        throw new UserNotFoundException(username.Value);
+        //    }
+
+        //    var orders = (await _context.Orders.GetByUserIdAsync(user.Id)).ToList();
+
+        //    return new Result<List<Order>>
+        //    {
+        //        Value = orders,
+        //        Hits = orders.Count,
+        //        Token = new JwtSecurityTokenHandler().WriteToken(JwtHelper.GetToken(User.Claims, _configuration))
+        //    };
+        //}
+
+
+        //TODO It needs? To get absolutely all orders?
         [HttpGet("")]
-        [Authorize]
+        //TODO delete comments
+        //[HttpGet("all")]
+        [Authorize(Roles = UserRoles.Manager)]
+        //public async Task<Result<List<Order>>> GetAll()
         public async Task<Result<List<Order>>> Get()
         {
-            var orders = (await _context.Orders.GetAsync()).ToList();
-
-            if(User.IsInRole(UserRoles.User))
-            {
-                var username = User.FindFirst(c => c.Type == ClaimTypes.Name);
-
-                if (username == null)
-                {
-                    throw new InternalServerException();
-                }
-
-                var user = await _context.Users.GetByUserNameAsync(username.Value);
-
-                if (user == null)
-                {
-                    throw new UserNotFoundException(username.Value);
-                }
-
-                orders = orders.Where(o => o.UserId == user.Id).ToList();
-            }
-
-            return new Result<List<Order>>
-            {
-                Value = orders,
-                Hits = orders.Count,
-                Token = new JwtSecurityTokenHandler().WriteToken(JwtHelper.GetToken(User.Claims, _configuration))
-            };
-        }
-
-        [HttpGet("all")]
-        [Authorize(Roles = UserRoles.Manager)]
-        public async Task<Result<List<Order>>> GetAll()
-        {
+            await _context.Users.CheckUserAsync(User.Identity);
             var orders = (await _context.Orders.GetAsync()).ToList();
 
             return new Result<List<Order>>
@@ -75,6 +85,7 @@ namespace Watch.WebApi.Controllers
         [Authorize]
         public async Task<Result<List<Order>>> GetByUserId(string userId)
         {
+            await _context.Users.CheckUserAsync(User.Identity);
             var username = User.FindFirst(c => c.Type == ClaimTypes.Name);
 
             if (username == null)
@@ -89,7 +100,7 @@ namespace Watch.WebApi.Controllers
                 throw new UserNotFoundException(userId);
             }
 
-            if (user.Id != userId && !User.IsInRole(UserRoles.Manager))
+            if (user.Id != userId)
             {
                 throw new ForbiddenException();
             }
@@ -104,11 +115,28 @@ namespace Watch.WebApi.Controllers
             };
         }
 
+        [HttpGet("/manager/{managerId}")]
+        [Authorize(Roles = UserRoles.Manager)]
+        public async Task<Result<List<Order>>> GetByManagerId(string managerId)
+        {
+            await _context.Users.CheckUserAsync(User.Identity);
+            var username = User.FindFirst(c => c.Type == ClaimTypes.Name);
+
+            var orders = (await _context.Orders.GetByManagerIdAsync(managerId)).ToList();
+
+            return new Result<List<Order>>
+            {
+                Value = orders,
+                Hits = orders.Count,
+                Token = new JwtSecurityTokenHandler().WriteToken(JwtHelper.GetToken(User.Claims, _configuration))
+            };
+        }
+
         [HttpGet("{id:int}")]
-        //[Authorize(Roles = $"{UserRoles.Admin},{UserRoles.Manager}")]
         [Authorize]
         public async Task<Result<Order?>> Get(int id)
         {
+            await _context.Users.CheckUserAsync(User.Identity);
             var username = User.FindFirst(c => c.Type == ClaimTypes.Name);
 
             if (username == null)
@@ -129,7 +157,12 @@ namespace Watch.WebApi.Controllers
                 throw new InternalServerException();
             }
 
-            if (user.Id != order.UserId && !User.IsInRole(UserRoles.Manager))
+            if (order.Manager == null)
+            {
+                throw new UserNotFoundException();
+            }
+
+            if (user.Id != order.UserId && user.Id != order.Manager.Id)
             {
                 throw new ForbiddenException();
             }
@@ -145,6 +178,7 @@ namespace Watch.WebApi.Controllers
         [Authorize]
         public async Task<Result<Order>> Create()
         {
+            await _context.Users.CheckUserAsync(User.Identity);
             var username = User.FindFirst(c => c.Type == ClaimTypes.Name);
 
             if (username == null)
@@ -181,21 +215,8 @@ namespace Watch.WebApi.Controllers
         [Authorize(Roles = UserRoles.Manager)]
         public async Task<Result<bool>> Update(int id)
         {
-            var res = await _context.Orders.CloseOrderAsync(id);
-            return new Result<bool>
-            {
-                Value = res,
-                Hits = res == true ? 1 : 0,
-                Token = new JwtSecurityTokenHandler().WriteToken(JwtHelper.GetToken(User.Claims, _configuration))
-            };
-        }
+            await _context.Users.CheckUserAsync(User.Identity);
 
-
-        //Cancel order
-        [HttpDelete("{id:int}")]
-        [Authorize]
-        public async Task<Result<bool>> Delete(int id)
-        {
             var username = User.FindFirst(c => c.Type == ClaimTypes.Name);
 
             if (username == null)
@@ -211,12 +232,64 @@ namespace Watch.WebApi.Controllers
             }
 
             var order = await _context.Orders.GetAsync(id);
-            if(order == null)
+
+            if (order == null)
             {
                 throw new OrderNotFoundException(id);
             }
 
-            if (user.Id != order.UserId && !User.IsInRole(UserRoles.Manager))
+            if (order.Manager == null)
+            {
+                throw new UserNotFoundException();
+            }
+
+            if (user.Id != order.Manager.Id)
+            {
+                throw new ForbiddenException();
+            }
+
+            var res = await _context.Orders.CloseOrderAsync(id);
+            return new Result<bool>
+            {
+                Value = res,
+                Hits = res == true ? 1 : 0,
+                Token = new JwtSecurityTokenHandler().WriteToken(JwtHelper.GetToken(User.Claims, _configuration))
+            };
+        }
+
+
+        //Cancel order
+        [HttpDelete("{id:int}")]
+        [Authorize]
+        public async Task<Result<bool>> Delete(int id)
+        {
+            await _context.Users.CheckUserAsync(User.Identity);
+            var username = User.FindFirst(c => c.Type == ClaimTypes.Name);
+
+            if (username == null)
+            {
+                throw new InternalServerException();
+            }
+
+            var user = await _context.Users.GetByUserNameAsync(username.Value);
+
+            if (user == null)
+            {
+                throw new UserNotFoundException(username.Value);
+            }
+
+            var order = await _context.Orders.GetAsync(id);
+            if (order == null)
+            {
+                throw new OrderNotFoundException(id);
+            }
+
+            if(order.Manager == null)
+            {
+                throw new UserNotFoundException();
+            }
+
+            if (user.Id != order.UserId && user.Id != order.Manager.Id)
             {
                 throw new ForbiddenException();
             }

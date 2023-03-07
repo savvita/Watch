@@ -1,32 +1,61 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Watch.DataAccess.UI.Interfaces;
 using Watch.DataAccess.UI.Repositories;
-using Watch.Domain.Models;
 
 namespace Watch.DataAccess.UI
 {
     public class DbContext
     {
-        public ICategoryRepository Categories { get; }
+        private readonly WatchDbContext _context;
+        public IBrandRepository Brands { get; }
         public IOrderRepository Orders { get; }
         public IBasketRepository Baskets { get; }
-        public IProducerRepository Producers { get; }
+        public ICaseShapeRepository CaseShapes { get; }
+        public ICollectionRepository Collections { get; }
+        public IColorRepository Colors { get; }
+        public ICountryRepository Countries { get; }
+        public IDialTypeRepository DialTypes { get; }
+        public IFunctionRepository Functions { get; }
+        public IGenderRepository Genders { get; }
+        public IGlassTypeRepository GlassTypes { get; }
+        public IIncrustationTypeRepository IncrustationTypes { get; }
+        public IMaterialRepository Materials { get; }
+        public IMovementTypeRepository MovementTypes { get; }
         public IOrderStatusRepository OrderStatuses { get; }
+        public IStrapTypeRepository StrapTypes { get; }
+        public IStyleRepository Styles { get; }
         public IUserRepository Users { get; }
         public IWatchRepository Watches { get; }
+        public IWaterResistanceRepository WaterResistance { get; }
+        public IImageRepository Images { get; }
 
-        private readonly WatchDbContext _context;
 
         public DbContext(WatchDbContext context, UserManager<UserModel> userManager, RoleManager<IdentityRole> roleManager)
         {
             _context = context;
-            Categories = new CategoryRepository(context, userManager, roleManager);
-            Orders = new OrderRepository(context, userManager, roleManager);
-            Baskets = new BasketRepository(context, userManager, roleManager);
-            Producers = new ProducerRepository(context, userManager, roleManager);
-            OrderStatuses = new OrderStatusRepository(context, userManager, roleManager);
-            Users = new UserRepository(context, userManager, roleManager);
-            Watches = new WatchRepository(context, userManager, roleManager);
+            var uow = new UnitOfWorks.UnitOfWorks(context, userManager, roleManager);
+
+            Baskets = new BasketRepository(uow);
+            Brands = new BrandRepository(uow);
+            CaseShapes = new CaseShapeRepository(uow);
+            Collections = new CollectionRepository(uow);
+            Colors = new ColorRepository(uow);
+            Countries = new CountryRepository(uow);
+            DialTypes = new DialTypeRepository(uow);
+            Functions = new FunctionRepository(uow);
+            Genders = new GenderRepository(uow);
+            GlassTypes = new GlassTypeRepository(uow);
+            IncrustationTypes = new IncrustationTypeRepository(uow);
+            Materials = new MaterialRepository(uow);
+            MovementTypes = new MovementTypeRepository(uow);
+            Orders = new OrderRepository(uow);
+            OrderStatuses = new OrderStatusRepository(uow);
+            StrapTypes = new StrapTypeRepository(uow);
+            Styles = new StyleRepository(uow);
+            Users = new UserRepository(uow);
+            Watches = new WatchRepository(uow);
+            WaterResistance = new WaterResistanceRepository(uow);
+            Images = new ImageRepository(uow);
         }
 
         public async Task SaveChangesAsync()

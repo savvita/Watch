@@ -1,14 +1,10 @@
-﻿using Watch.Domain.Models;
-
-namespace Watch.DataAccess.UI.Models
+﻿namespace Watch.DataAccess.UI.Models
 {
     public class Basket
     {
         public int Id { get; set; }
 
         public string UserId { get; set; } = null!;
-
-        public DateTime Date { get; set; }
 
         public List<BasketDetail> Details { get; set; } = new List<BasketDetail>();
 
@@ -19,20 +15,19 @@ namespace Watch.DataAccess.UI.Models
         public Basket(BasketModel model)
         {
             Id = model.Id;
-            Date = model.Date;
             UserId = model.UserId;
+            model.Details.ToList().ForEach(d => Details.Add(new BasketDetail(d)));
         }
 
-        public static explicit operator BasketModel(Basket basket)
+        public static explicit operator BasketModel(Basket entity)
         {
             var model = new BasketModel()
             {
-                Id = basket.Id,
-                Date = basket.Date,
-                UserId = basket.UserId
+                Id = entity.Id,
+                UserId = entity.UserId
             };
 
-            basket.Details.ForEach(detail => model.Details.Add((BasketDetailModel)detail));
+            entity.Details.ForEach(detail => model.Details.Add((BasketDetailModel)detail));
             return model;
         }
     }

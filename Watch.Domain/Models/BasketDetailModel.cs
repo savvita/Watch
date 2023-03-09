@@ -6,7 +6,6 @@
         public int BasketId { get; set; }
         public int WatchId { get; set; }
         public int Count { get; set; }
-        public decimal UnitPrice { get; set; }
         public virtual WatchModel? Watch { get; set; }
         public virtual BasketModel? Basket { get; set; }
     }

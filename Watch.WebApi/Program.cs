@@ -4,15 +4,12 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Watch.DataAccess;
-using Watch.DataAccess.UI.Models;
 using Watch.Domain.Models;
 using Watch.WebApi;
-using Watch.WebApi.Cache;
 using ConfigurationManager = Watch.WebApi.ConfigurationManager;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
 
 builder.Services.AddControllers(options =>
 {
@@ -21,14 +18,14 @@ builder.Services.AddControllers(options =>
 
 builder.Services.AddControllers().AddNewtonsoftJson();
 
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 
 builder.Services.AddDbContext<WatchDbContext>(options =>
 {
-    string? connection = builder.Configuration.GetConnectionString("DefaultConnection");
+    //string? connection = builder.Configuration.GetConnectionString("LocalConnection");
+    string? connection = builder.Configuration.GetConnectionString("AzureConnection");
     options.UseSqlServer(connection);
 });
 
@@ -36,6 +33,7 @@ builder.Services.AddIdentity<UserModel, IdentityRole>()
     .AddEntityFrameworkStores<WatchDbContext>()
     .AddDefaultTokenProviders();
 
+//TODO change password requirements
 builder.Services.Configure<IdentityOptions>(options =>
 {
     // Password settings.
@@ -77,11 +75,13 @@ builder.Services.AddAuthentication(options =>
     };
 });
 
-builder.Services.AddScoped<ICacheService, CacheService>();
+
+builder.Services.AddMemoryCache();
+//builder.Services.AddScoped<ICacheService, CacheService>();
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
+
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -89,6 +89,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+app.UseStaticFiles();
+
 
 app.UseAuthentication();
 app.UseAuthorization();

@@ -1,6 +1,4 @@
-﻿using Watch.Domain.Models;
-
-namespace Watch.DataAccess.UI.Models
+﻿namespace Watch.DataAccess.UI.Models
 {
     public class BasketDetail
     {
@@ -8,10 +6,9 @@ namespace Watch.DataAccess.UI.Models
 
         public int WatchId { get; set; }
 
-        public decimal UnitPrice { get; set; }
-
         public int Count { get; set; }
         public int BasketId { get; set; }
+        public decimal UnitPrice { get; set; }
 
         public BasketDetail()
         {
@@ -20,21 +17,19 @@ namespace Watch.DataAccess.UI.Models
         public BasketDetail(BasketDetailModel model)
         {
             Id = model.Id;
-            UnitPrice = model.UnitPrice;
             WatchId = model.WatchId;
             BasketId = model.BasketId;
             Count = model.Count;
         }
 
-        public static explicit operator BasketDetailModel(BasketDetail detail)
+        public static explicit operator BasketDetailModel(BasketDetail entity)
         {
             return new BasketDetailModel()
             {
-                Id = detail.Id,
-                BasketId = detail.BasketId,
-                Count = detail.Count,
-                UnitPrice = detail.UnitPrice,
-                WatchId = detail.WatchId
+                Id = entity.Id,
+                BasketId = entity.BasketId,
+                Count = entity.Count,
+                WatchId = entity.WatchId
             };
         }
     }

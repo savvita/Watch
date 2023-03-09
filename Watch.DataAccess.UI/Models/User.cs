@@ -1,20 +1,28 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using Watch.Domain.Models;
 
 namespace Watch.DataAccess.UI.Models
 {
     public class User
     {
         public string Id { get; set; } = null!;
-        public long? ChatId { get; set; }
-        public string? UserName { get; set; }
 
-        [StringLength(100)]
+        [MaxLength(100)]
         public string? FirstName { get; set; }
+
+        [MaxLength(100)]
+        public string? SecondName { get; set; }
+
+        [MaxLength(100)]
+        public string? LastName { get; set; }
+
+        public string? UserName { get; set; }
 
         public string? Email { get; set; }
 
+        public bool IsActive { get; set; }
+
         public bool IsManager { get; set; }
+
         public bool IsAdmin { get; set; }
 
         public User()
@@ -24,20 +32,25 @@ namespace Watch.DataAccess.UI.Models
         public User(UserModel model)
         {
             Id = model.Id;
-            ChatId = model.ChatId;
             UserName = model.UserName;
             FirstName = model.FirstName;
+            SecondName = model.SecondName;
+            LastName = model.LastName;
             Email = model.Email;
+            IsActive = model.IsActive;
         }
 
-        public static explicit operator UserModel(User user)
+        public static explicit operator UserModel(User entity)
         {
             return new UserModel()
             {
-                Id = user.Id,
-                UserName = user.UserName,
-                ChatId = user.ChatId,
-                FirstName = user.FirstName
+                Id = entity.Id,
+                UserName = entity.UserName,
+                FirstName = entity.FirstName,
+                SecondName = entity.SecondName,
+                LastName = entity.LastName,
+                IsActive = entity.IsActive,
+                Email = entity.Email
             };
         }
     }

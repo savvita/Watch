@@ -21,6 +21,16 @@ namespace Watch.WebApi
                         StatusCode = (int)HttpStatusCode.Unauthorized
                     };
                 }
+                else if (context.Exception is InactiveUserException)
+                {
+                    context.Result = new ObjectResult(new
+                    {
+                        code = "inactive-user"
+                    })
+                    {
+                        StatusCode = (int)HttpStatusCode.Unauthorized
+                    };
+                }
                 else if (context.Exception is ConflictException)
                 {
                     context.Result = new ObjectResult(new
@@ -66,6 +76,16 @@ namespace Watch.WebApi
                     context.Result = new ObjectResult(new
                     {
                         code = "basket-not-found"
+                    })
+                    {
+                        StatusCode = (int)HttpStatusCode.NotFound
+                    };
+                }
+                else if (context.Exception is ArgumentNullException)
+                {
+                    context.Result = new ObjectResult(new
+                    {
+                        code = "required-argumets-missed"
                     })
                     {
                         StatusCode = (int)HttpStatusCode.NotFound

@@ -28,6 +28,8 @@ namespace Watch.WebApi.Controllers
         [HttpGet("")]
         public async Task<Result<List<User>>> Get()
         {
+            await _context.Users.CheckUserAsync(User.Identity);
+
             var users = (await _context.Users.GetAsync()).ToList();
             return new Result<List<User>>
             {
@@ -37,10 +39,25 @@ namespace Watch.WebApi.Controllers
             };
         }
 
+        [HttpGet("{id}")]
+        public async Task<Result<User?>> Get(string id)
+        {
+            await _context.Users.CheckUserAsync(User.Identity);
+
+            var user = await _context.Users.GetAsync(id);
+            return new Result<User?>
+            {
+                Value = user,
+                Hits = user != null ? 1 : 0,
+                Token = User.Claims.Count() > 0 ? new JwtSecurityTokenHandler().WriteToken(JwtHelper.GetToken(User.Claims, _configuration)) : null
+            };
+        }
+
 
         [HttpPut("")]
         public async Task<Result<User>> Update([FromBody] User user)
         {
+            await _context.Users.CheckUserAsync(User.Identity);
             return new Result<User>
             {
                 Value = await _context.Users.UpdateAsync(user),
@@ -49,14 +66,28 @@ namespace Watch.WebApi.Controllers
             };
         }
 
+        [HttpPut("/restore/{id}")]
+        public async Task<Result<bool>> Restore(string id)
+        {
+            await _context.Users.CheckUserAsync(User.Identity);
+            var res = await _context.Users.RestoreAsync(id);
+            return new Result<bool>
+            {
+                Value = res,
+                Hits = res == true ? 1 : 0,
+                Token = new JwtSecurityTokenHandler().WriteToken(JwtHelper.GetToken(User.Claims, _configuration))
+            };
+        }
+
         [HttpDelete("{id}")]
         public async Task<Result<bool>> Delete(string id)
         {
-            await _context.Users.DeleteAsync(id);
+            await _context.Users.CheckUserAsync(User.Identity);
+            var res = await _context.Users.DeleteAsync(id);
             return new Result<bool>
             {
-                Value = true,
-                Hits = 1,
+                Value = res,
+                Hits = res == true ? 1 : 0,
                 Token = new JwtSecurityTokenHandler().WriteToken(JwtHelper.GetToken(User.Claims, _configuration))
             };
         }

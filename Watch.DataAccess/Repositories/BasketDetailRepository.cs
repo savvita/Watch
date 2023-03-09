@@ -5,7 +5,7 @@ namespace Watch.DataAccess.Repositories
 {
     public class BasketDetailRepository : GenericRepository<BasketDetailModel>, IBasketDetailRepository
     {
-        public BasketDetailRepository(WatchDbContext context) : base(context)
+        public BasketDetailRepository(WatchDbContext db) : base(db)
         {
         }
 

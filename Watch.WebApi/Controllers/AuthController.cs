@@ -32,6 +32,11 @@ namespace Watch.WebApi.Controllers
 
             if (user != null)
             {
+                if(!user.IsActive)
+                {
+                    throw new InactiveUserException(user.Id);
+                }
+
                 var roles = (await _context.Users.GetRolesAsync(user)).ToList();
 
                 var claims = new List<Claim>

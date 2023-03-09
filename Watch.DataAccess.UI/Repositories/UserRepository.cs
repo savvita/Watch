@@ -1,8 +1,7 @@
 ﻿using Microsoft.AspNetCore.Identity;
+using System.Security.Principal;
 using Watch.DataAccess.UI.Exceptions;
 using Watch.DataAccess.UI.Interfaces;
-using Watch.DataAccess.UI.Models;
-using Watch.Domain.Models;
 using Watch.Domain.Roles;
 
 namespace Watch.DataAccess.UI.Repositories
@@ -10,12 +9,19 @@ namespace Watch.DataAccess.UI.Repositories
     public class UserRepository : IUserRepository
     {
         private readonly UnitOfWorks.UnitOfWorks _db;
-        public UserRepository(WatchDbContext context, UserManager<UserModel> userManager, RoleManager<IdentityRole> roleManager)
+        public UserRepository(UnitOfWorks.UnitOfWorks db)
         {
-            _db = new UnitOfWorks.UnitOfWorks(context, userManager, roleManager);
+            _db = db;
         }
         public async Task<User?> CreateAsync(User entity)
         {
+            var user = await _db.UserManager.FindByNameAsync(entity.UserName);
+
+            if (user != null)
+            {
+                throw new ConflictException();
+            }
+
             var model = await _db.Users.CreateAsync((UserModel)entity);
 
             return model != null ? new User(model) : null;
@@ -34,6 +40,10 @@ namespace Watch.DataAccess.UI.Repositories
             {
                 UserName = entity.UserName,
                 Email = entity.Email,
+                FirstName = entity.FirstName,
+                SecondName = entity.SecondName,
+                LastName = entity.LastName,
+                IsActive = true,
                 SecurityStamp = Guid.NewGuid().ToString()
             };
 
@@ -72,14 +82,12 @@ namespace Watch.DataAccess.UI.Repositories
                 throw new UserNotFoundException(id);
             }
 
-            await _db.UserManager.DeleteAsync(model);
-
-            return true;
+            return await _db.Users.SetActivityAsync(id, false);
         }
 
         public async Task<bool> DeleteAsync(int id)
         {
-            return false;
+            return await Task.FromResult<bool>(false);
         }
 
 
@@ -99,9 +107,14 @@ namespace Watch.DataAccess.UI.Repositories
 
         public async Task<User?> GetAsync(int id)
         {
+            return await Task.FromResult<User?>(null);
+        }
+
+        public async Task<User?> GetAsync(string id)
+        {
             var model = await _db.Users.GetAsync(id);
 
-            if(model == null)
+            if (model == null)
             {
                 return null;
             }
@@ -137,14 +150,20 @@ namespace Watch.DataAccess.UI.Repositories
             {
                 throw new UserNotFoundException(entity.Id);
             }
+            var user = await _db.UserManager.FindByNameAsync(entity.UserName);
 
-            if (model.UserName != entity.UserName && await _db.UserManager.FindByNameAsync(entity.UserName) != null)
+            if(user != null && model.Id != user.Id)
             {
                 throw new ConflictException();
             }
 
             model.UserName = entity.UserName;
             model.Email = entity.Email;
+            model.FirstName = entity.FirstName;
+            model.SecondName = entity.SecondName;
+            model.LastName = entity.LastName;
+            model.IsActive = entity.IsActive;
+            model.IsActive = entity.IsActive;
 
             await _db.Users.UpdateAsync(model);
 
@@ -199,6 +218,47 @@ namespace Watch.DataAccess.UI.Repositories
             }
 
             return null;
+        }
+
+        public async Task<bool> RestoreAsync(string id)
+        {
+            var model = await _db.UserManager.FindByIdAsync(id);
+
+            if (model == null)
+            {
+                throw new UserNotFoundException(id);
+            }
+
+            if (model.IsActive == true)
+            {
+                return false;
+            }
+
+            await _db.Users.SetActivityAsync(id, true);
+
+            return true;
+        }
+
+        public async Task<bool> CheckUserAsync(IIdentity? identity)
+        {
+            if(identity == null || identity.Name == null)
+            {
+                throw new ArgumentNullException();
+            }
+
+            var user = await _db.UserManager.FindByNameAsync(identity.Name);
+
+            if (user == null)
+            {
+                throw new UserNotFoundException(identity.Name);
+            }
+
+            if(!user.IsActive)
+            {
+                throw new InactiveUserException(user.Id);
+            }
+
+            return true;
         }
     }
 }

@@ -42,7 +42,8 @@ namespace Watch.DataAccess.UI.Models
         public List<Image> Images { get; } = new List<Image>();
         public List<Function> Functions { get; } = new List<Function>();
 
-        public byte[] RowVersion { get; set; } = null!;
+        [Timestamp]
+        public byte[] RowVersion { get; set; }
         public Watch()
         {
         }

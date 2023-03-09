@@ -104,7 +104,7 @@ namespace Watch.WebApi.Controllers
         }
 
         [HttpPost("admin")]
-        //[Authorize(Roles = UserRoles.Admin)]
+        [Authorize(Roles = UserRoles.Admin)]
         public async Task<Result<string>> RegisterAdmin([FromBody] RegisterModel model)
         {
             await _context.Users.CreateAsync(model, new List<string>() { UserRoles.User, UserRoles.Admin });

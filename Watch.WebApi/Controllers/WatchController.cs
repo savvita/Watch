@@ -166,7 +166,7 @@ namespace Watch.WebApi.Controllers
         //TODO Check this
         [HttpPut("")]
         [Authorize(Roles = UserRoles.Manager)]
-        public async Task<Result<ConcurrencyUpdateResult<Watch.DataAccess.UI.Models.Watch>>> Update([FromBody] Watch.DataAccess.UI.Models.Watch watch)
+        public async Task<Result<ConcurrencyUpdateResult>> Update([FromBody] Watch.DataAccess.UI.Models.Watch watch)
         {
             await _context.Users.CheckUserAsync(User.Identity);
 
@@ -182,22 +182,11 @@ namespace Watch.WebApi.Controllers
                 if (_memoryCache.TryGetValue<List<Watch.DataAccess.UI.Models.Watch>>("watches", out List<Watch.DataAccess.UI.Models.Watch>? watches))
                 {
                     _memoryCache.Remove("watches");
-
-                    if (watches != null && res.ConcurrencyConflictedObject != null)
-                    {
-                        var w = watches.FirstOrDefault(x => x.Id == res.ConcurrencyConflictedObject.Id);
-                        if (w != null)
-                        {
-                            watches.Remove(w);
-                            watches.Add(res.ConcurrencyConflictedObject);
-                            _memoryCache.Set<List<Watch.DataAccess.UI.Models.Watch>>("watches", watches);
-                        }
-                    }
                 }
             }
 
 
-            return new Result<ConcurrencyUpdateResult<Watch.DataAccess.UI.Models.Watch>>
+            return new Result<ConcurrencyUpdateResult>
             {
                 Value = res,
                 Hits = 1,

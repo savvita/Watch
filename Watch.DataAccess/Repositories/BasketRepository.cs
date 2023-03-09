@@ -9,7 +9,7 @@ namespace Watch.DataAccess.Repositories
         {
         }
 
-        private bool ClearBasket(int id)
+        private async Task<bool> ClearBasket(int id)
         {
             var model = _db.Baskets.FirstOrDefault(b => b.Id == id);
             if (model == null)
@@ -17,17 +17,26 @@ namespace Watch.DataAccess.Repositories
                 return false;
             }
 
-            for (int i = 0; i < model.Details.Count(); i++)
+            var details = model.Details.ToList();
+
+            for (int i = 0; i < details.Count(); i++)
             {
-                _db.BasketDetails.Remove(model.Details.ElementAt(i));
+                var detail = _db.BasketDetails.Find(details[i].Id);
+
+                if (detail != null)
+                {
+                    _db.BasketDetails.Remove(detail);
+                }
             }
+
+            await _db.SaveChangesAsync();
 
             return true;
         }
 
         public new async Task<bool> DeleteAsync(int id)
         {
-            return await Task.FromResult<bool>(ClearBasket(id));
+            return await ClearBasket(id);
         }
 
         public new async Task<BasketModel?> CreateAsync(BasketModel model)

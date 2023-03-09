@@ -74,59 +74,37 @@ namespace Watch.DataAccess.Repositories
 
         //TODO Important! Check this
 
-        public async Task<ConcurrencyUpdateResultModel<WatchModel>> UpdateConcurrencyAsync(WatchModel entity)
+        public async Task<ConcurrencyUpdateResultModel> UpdateConcurrencyAsync(WatchModel entity)
         {
-            var model = await _db.Watches.FindAsync(entity.Id);
-            if(model == null)
-            {
-                return new ConcurrencyUpdateResultModel<WatchModel>()
-                {
-                    Code = 404,
-                    Message = "The entry was deleted"
-                };
-            }
-
             try
             {
-                _db.Entry(entity).OriginalValues["RowVersion"] = entity.RowVersion;
+                _db.Watches.Update(entity);
                 await _db.SaveChangesAsync();
 
-                return new ConcurrencyUpdateResultModel<WatchModel>()
+                return new ConcurrencyUpdateResultModel()
                 {
                     Code = 200,
-                    Message = "Ok",
-                    ConcurrencyConflictedObject = entity
+                    Message = "Ok"
                 };
             }
-            catch (DbUpdateConcurrencyException ex)
+            catch (DbUpdateConcurrencyException)
             {
-                var entry = ex.Entries.Single();
-                var clientValues = (WatchModel)entry.Entity;
-                var databaseEntry = entry.GetDatabaseValues();
+                var model = await _db.Watches.FindAsync(entity.Id);
 
-                if (databaseEntry == null)
+                if (model == null)
                 {
-                    return new ConcurrencyUpdateResultModel<WatchModel>()
+                    return new ConcurrencyUpdateResultModel()
                     {
                         Code = 404,
                         Message = "The entry was deleted"
                     };
                 }
-                else
+
+                return new ConcurrencyUpdateResultModel()
                 {
-                    var databaseValues = (WatchModel)databaseEntry.ToObject();
-
-                    var result = new ConcurrencyUpdateResultModel<WatchModel>()
-                    {
-                        Code = 409,
-                        Message = "The entry was modified by another user",
-                        ConcurrencyConflictedObject = databaseValues
-                    };
-
-                    entity.RowVersion = databaseValues.RowVersion;
-
-                    return result;
-                }
+                    Code = 409,
+                    Message = "The entry was modified by another user"
+                };
             }
         }
 

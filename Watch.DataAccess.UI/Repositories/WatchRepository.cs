@@ -141,15 +141,14 @@ namespace Watch.DataAccess.UI.Repositories
             return new Watch.DataAccess.UI.Models.Watch(model);
         }
 
-        public async Task<ConcurrencyUpdateResult<Models.Watch>> UpdateConcurrencyAsync(Models.Watch entity)
+        public async Task<ConcurrencyUpdateResult> UpdateConcurrencyAsync(Models.Watch entity)
         {
             var model = await _db.Watches.UpdateConcurrencyAsync((WatchModel)entity);
 
-            return new Models.ConcurrencyUpdateResult<Models.Watch>()
+            return new Models.ConcurrencyUpdateResult()
             {
                 Code = model.Code,
-                Message = model.Message,
-                ConcurrencyConflictedObject = model.ConcurrencyConflictedObject != null ? new Models.Watch(model.ConcurrencyConflictedObject) : null
+                Message = model.Message
             };
         }
     }

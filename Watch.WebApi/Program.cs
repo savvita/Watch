@@ -24,8 +24,8 @@ builder.Services.AddSwaggerGen();
 
 builder.Services.AddDbContext<WatchDbContext>(options =>
 {
-    string? connection = builder.Configuration.GetConnectionString("LocalConnection");
-    //string? connection = builder.Configuration.GetConnectionString("AzureConnection");
+    //string? connection = builder.Configuration.GetConnectionString("LocalConnection");
+    string? connection = builder.Configuration.GetConnectionString("AzureConnection");
     options.UseSqlServer(connection);
 });
 

@@ -2,7 +2,7 @@
 {
     public class Basket
     {
-        public int Id { get; set; }
+        public int Id { get; private set; }
 
         public string UserId { get; set; } = null!;
 

@@ -41,6 +41,8 @@ namespace Watch.DataAccess.UI.Models
         public string? Description { get; set; }
         public List<Image> Images { get; } = new List<Image>();
         public List<Function> Functions { get; } = new List<Function>();
+
+        public byte[] RowVersion { get; set; } = null!;
         public Watch()
         {
         }
@@ -136,6 +138,8 @@ namespace Watch.DataAccess.UI.Models
 
             model.Functions.ToList().ForEach(f => Functions.Add(new Function(f)));
             model.Images.ToList().ForEach(i => Images.Add(new Image(i)));
+
+            RowVersion = model.RowVersion;
     }
 
         public static explicit operator WatchModel(Watch entity)
@@ -168,6 +172,7 @@ namespace Watch.DataAccess.UI.Models
                 IncrustationTypeId = entity.IncrustationType != null ? entity.IncrustationType.Id : null,
                 DialTypeId = entity.DialType != null ? entity.DialType.Id : null,
                 GenderId = entity.Gender != null ? entity.Gender.Id : null,
+                RowVersion = entity.RowVersion
             };
 
             entity.Functions.ForEach(f => model.Functions.Add((FunctionModel)f));

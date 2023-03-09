@@ -5,7 +5,7 @@
         IWatchCounter Count { get; }
         Task<bool> SoftDeleteAsync(int id);
         Task<bool> RestoreAsync(int id);
-        Task<ConcurrencyUpdateResult<Models.Watch>> UpdateConcurrencyAsync(Models.Watch entity);
+        Task<ConcurrencyUpdateResult> UpdateConcurrencyAsync(Models.Watch entity);
 
         Task<Result<IEnumerable<Watch.DataAccess.UI.Models.Watch>>> GetAsync(int page, int perPage, WatchFilter? filters = null);
     }

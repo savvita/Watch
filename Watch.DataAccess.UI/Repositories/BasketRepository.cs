@@ -181,6 +181,7 @@ namespace Watch.DataAccess.UI.Repositories
 
                 if (d == null)
                 {
+                    detail.BasketId = entity.Id;
                     await _db.BasketDetails.CreateAsync((BasketDetailModel)detail);
                 }
                 else

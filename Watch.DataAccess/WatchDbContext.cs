@@ -29,6 +29,10 @@ namespace Watch.DataAccess
         public DbSet<WaterResistanceModel> WaterResistance { get; set; }
 
         public DbSet<ImageModel> Images { get; set; }
+        public DbSet<PaymentModel> Payments { get; set; }
+        public DbSet<DeliveryModel> Deliveries { get; set; }
+        public DbSet<CityModel> Cities { get; set; }
+        public DbSet<WarehouseModel> Warehouses { get; set; }
 
         public WatchDbContext(DbContextOptions options) : base(options)
         {
@@ -43,12 +47,23 @@ namespace Watch.DataAccess
                 new OrderStatusModel { Id = 1, Value = "Новий" },
                 new OrderStatusModel { Id = 2, Value = "В обробці" },
                 new OrderStatusModel { Id = 3, Value = "Виконано" },
-                new OrderStatusModel { Id = 4, Value = "Скасовано" }
+                new OrderStatusModel { Id = 4, Value = "Скасовано" },
+                new OrderStatusModel { Id = 5, Value = "Оплачено" },
+                new OrderStatusModel { Id = 6, Value = "Очікує оплати" },
+                new OrderStatusModel { Id = 7, Value = "Відправлено" }
             );
             modelBuilder.Entity<GenderModel>().HasData(
                 new GenderModel { Id = 1, Value = "Чоловіча" },
                 new GenderModel { Id = 2, Value = "Жіноча" },
                 new GenderModel { Id = 3, Value = "Унісекс" }
+            );
+            modelBuilder.Entity<PaymentModel>().HasData(
+                new PaymentModel { Id = 1, Value = "Передоплата на розрахунковий рахунок", IsActive = true },
+                new PaymentModel { Id = 2, Value = "Післяплата", IsActive = true }
+            );
+            modelBuilder.Entity<DeliveryModel>().HasData(
+                new DeliveryModel { Id = 1, Value = "Самовивіз", IsActive = true },
+                new DeliveryModel { Id = 2, Value = "Нова Пошта", IsActive = true }
             );
         }
     }

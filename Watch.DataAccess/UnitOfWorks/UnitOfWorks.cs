@@ -49,6 +49,10 @@ namespace Watch.DataAccess.UnitOfWorks
 
         public IStrapTypeRepository StrapTypes { get; }
         public IImageRepository Images { get; }
+        public IPaymentRepository Payments { get; }
+        public IDeliveryRepository Deliveries { get; }
+        public ICityRepository Cities { get; }
+        public IWarehouseRepository Warehouses { get; }
 
         public UnitOfWorks(WatchDbContext context, UserManager<UserModel> userManager, RoleManager<IdentityRole> roleManager)
         {
@@ -76,6 +80,10 @@ namespace Watch.DataAccess.UnitOfWorks
             Collections = new CollectionRepository(context);
             CaseShapes = new CaseShapeRepository(context);
             Images = new ImageRepository(context);
+            Deliveries= new DeliveryRepository(context);
+            Payments = new PaymentRepository(context);
+            Cities = new CityRepository(context);
+            Warehouses= new WarehouseRepository(context);
             UserManager = userManager;
             Roles = roleManager;
 
@@ -87,7 +95,7 @@ namespace Watch.DataAccess.UnitOfWorks
             _db.Dispose();
         }
 
-        public async Task<OrderModel?> CreateOrderAsync(BasketModel basket)
+        public async Task<OrderModel?> CreateOrderAsync(BasketModel basket, OrderAdditionalInfoModel info)
         {
             // TODO check this
 
@@ -99,7 +107,13 @@ namespace Watch.DataAccess.UnitOfWorks
                     {
                         Date = DateTime.Now,
                         StatusId = 1,
-                        UserId = basket.UserId
+                        UserId = basket.UserId,
+                        PaymentId = info.PaymentId,
+                        DeliveryId = info.DeliveryId,
+                        FullName = info.FullName,
+                        PhoneNumber = info.PhoneNumber,
+                        CityId = info.SettlementRef,
+                        WarehouseId = info.WarehouseRef
                     });
 
                     if (order == null)
@@ -217,10 +231,9 @@ namespace Watch.DataAccess.UnitOfWorks
             {
                 OrderId = order.Id,
                 WatchId = detail.WatchId,
-                UnitPrice = watch.Price,
+                UnitPrice = watch.Discount != null ? watch.Price - watch.Price * (decimal)watch.Discount / 100 :  watch.Price,
                 Count = detail.Count
             });
-
             if (d == null)
             {
                 return false;

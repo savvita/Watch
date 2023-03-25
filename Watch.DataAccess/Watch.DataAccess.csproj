@@ -18,6 +18,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Watch.Domain\Watch.Domain.csproj" />
+    <ProjectReference Include="..\Watch.NovaPoshta\Watch.NovaPoshta.csproj" />
   </ItemGroup>
 
   <ItemGroup>

@@ -32,6 +32,7 @@ namespace Watch.DataAccess.UI
         public IDeliveryRepository Deliveries { get; }
         public ICityRepository Cities { get; }
         public IWarehouseRepository Warehouses { get; }
+        public IReviewRepository Reviews { get; }
 
 
         public DbContext(WatchDbContext context, UserManager<UserModel> userManager, RoleManager<IdentityRole> roleManager)
@@ -64,6 +65,7 @@ namespace Watch.DataAccess.UI
             Deliveries = new DeliveryRepository(uow);
             Cities = new CityRepository(uow);
             Warehouses = new WarehouseRepository(uow);
+            Reviews = new ReviewRepository(uow);
         }
 
         public async Task SaveChangesAsync()

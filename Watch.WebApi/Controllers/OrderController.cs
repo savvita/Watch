@@ -88,7 +88,6 @@ namespace Watch.WebApi.Controllers
             };
         }
 
-        //TODO check this
         [HttpGet("sales")]
         [Authorize(Roles = UserRoles.Manager)]
         public async Task<Result<List<Watch.DataAccess.UI.Models.Order>>> Get(

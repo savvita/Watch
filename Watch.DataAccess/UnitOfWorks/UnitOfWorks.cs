@@ -53,6 +53,7 @@ namespace Watch.DataAccess.UnitOfWorks
         public IDeliveryRepository Deliveries { get; }
         public ICityRepository Cities { get; }
         public IWarehouseRepository Warehouses { get; }
+        public IReviewRepository Reviews { get; }
 
         public UnitOfWorks(WatchDbContext context, UserManager<UserModel> userManager, RoleManager<IdentityRole> roleManager)
         {
@@ -84,6 +85,7 @@ namespace Watch.DataAccess.UnitOfWorks
             Payments = new PaymentRepository(context);
             Cities = new CityRepository(context);
             Warehouses= new WarehouseRepository(context);
+            Reviews = new ReviewRepository(context);
             UserManager = userManager;
             Roles = roleManager;
 
@@ -97,8 +99,6 @@ namespace Watch.DataAccess.UnitOfWorks
 
         public async Task<OrderModel?> CreateOrderAsync(BasketModel basket, OrderAdditionalInfoModel info)
         {
-            // TODO check this
-
             using (var transaction = _db.Database.BeginTransaction())
             {
                 try

@@ -33,6 +33,7 @@ namespace Watch.DataAccess
         public DbSet<DeliveryModel> Deliveries { get; set; }
         public DbSet<CityModel> Cities { get; set; }
         public DbSet<WarehouseModel> Warehouses { get; set; }
+        public DbSet<ReviewModel> Reviews { get; set; }
 
         public WatchDbContext(DbContextOptions options) : base(options)
         {

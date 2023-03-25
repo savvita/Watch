@@ -39,6 +39,7 @@ namespace Watch.DataAccess.Repositories
                 .Include(w => w.Gender)
                 .Include(w => w.Images)
                 .Include(w => w.Functions)
+                .Include(w => w.Reviews)
                 .ToList();
 
             return e.ElementAt(0);

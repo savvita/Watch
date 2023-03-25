@@ -61,5 +61,6 @@ namespace Watch.Domain.Models
 
         public virtual ICollection<ImageModel> Images { get; } = new List<ImageModel>();
         public virtual ICollection<FunctionModel> Functions { get; } = new List<FunctionModel>();
+        public virtual ICollection<ReviewModel> Reviews { get; } = new List<ReviewModel>();
     }
 }

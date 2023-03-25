@@ -43,7 +43,7 @@ namespace Watch.DataAccess.UI.Models
         public List<Function> Functions { get; } = new List<Function>();
 
         [Timestamp]
-        public byte[] RowVersion { get; set; }
+        public byte[]? RowVersion { get; set; }
         public Watch()
         {
         }

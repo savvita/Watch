@@ -26,7 +26,7 @@ namespace Watch.WebApi.Controllers
         }
 
         [HttpPost("")]
-        public async Task<Result<string>> Login([FromBody] LoginModel model)
+        public async Task<Result<User>> Login([FromBody] LoginModel model)
         {
             var user = await _context.Users.CheckCredentialsAsync(model);
 
@@ -42,17 +42,18 @@ namespace Watch.WebApi.Controllers
                 var claims = new List<Claim>
                 {
                     new Claim(ClaimTypes.Name, model.UserName),
-                    new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
+                    new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+                    new Claim("IsActive", user.IsActive.ToString())
                 };
 
                 roles.ForEach(role => claims.Add(new Claim(ClaimTypes.Role, role)));
 
                 var token = new JwtSecurityTokenHandler().WriteToken(JwtHelper.GetToken(claims, _configuration));
 
-                return new Result<string>()
+                return new Result<User>()
                 {
                     Token = token,
-                    Value = token
+                    Value = new User(user)
                 };
             }
 
@@ -60,54 +61,32 @@ namespace Watch.WebApi.Controllers
         }
 
         [HttpPost("user")]
-        public async Task<Result<string>> Register([FromBody] RegisterModel model)
+        public async Task<Result<User?>> Register([FromBody] RegisterModel model)
         {
-            await _context.Users.CreateAsync(model, new List<string>() { UserRoles.User });
-
-            var claims = new List<Claim>
-                {
-                    new Claim(ClaimTypes.Name, model.UserName),
-                    new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-                    new Claim(ClaimTypes.Role, UserRoles.User)
-                };
-
-            var token = new JwtSecurityTokenHandler().WriteToken(JwtHelper.GetToken(claims, _configuration));
-
-            return new Result<string>()
-            {
-                Token = token,
-                Value = token
-            };
-        }
-
-        [HttpPost("manager")]
-        [Authorize(Roles = UserRoles.Admin)]
-        public async Task<Result<string>> RegisterManager([FromBody] RegisterModel model)
-        {
-            await _context.Users.CreateAsync(model, new List<string>() { UserRoles.User, UserRoles.Manager });
+            var user = await _context.Users.CreateAsync(model, new List<string>() { UserRoles.User });
 
             var claims = new List<Claim>
                 {
                     new Claim(ClaimTypes.Name, model.UserName),
                     new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
                     new Claim(ClaimTypes.Role, UserRoles.User),
-                    new Claim(ClaimTypes.Role, UserRoles.Manager)
+                    new Claim("IsActive", true.ToString())
                 };
 
             var token = new JwtSecurityTokenHandler().WriteToken(JwtHelper.GetToken(claims, _configuration));
 
-            return new Result<string>()
+            return new Result<User?>()
             {
                 Token = token,
-                Value = token
+                Value = user
             };
         }
 
-        [HttpPost("admin")]
+        [HttpPost("manager")]
         [Authorize(Roles = UserRoles.Admin)]
-        public async Task<Result<string>> RegisterAdmin([FromBody] RegisterModel model)
+        public async Task<Result<User?>> RegisterManager([FromBody] RegisterModel model)
         {
-            await _context.Users.CreateAsync(model, new List<string>() { UserRoles.User, UserRoles.Admin });
+            var user = await _context.Users.CreateAsync(model, new List<string>() { UserRoles.User, UserRoles.Manager });
 
             var claims = new List<Claim>
                 {
@@ -115,15 +94,40 @@ namespace Watch.WebApi.Controllers
                     new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
                     new Claim(ClaimTypes.Role, UserRoles.User),
                     new Claim(ClaimTypes.Role, UserRoles.Manager),
-                    new Claim(ClaimTypes.Role, UserRoles.Admin)
+                    new Claim("IsActive", true.ToString())
                 };
 
             var token = new JwtSecurityTokenHandler().WriteToken(JwtHelper.GetToken(claims, _configuration));
 
-            return new Result<string>()
+            return new Result<User?>()
             {
                 Token = token,
-                Value = token
+                Value = user
+            };
+        }
+
+        [HttpPost("admin")]
+        [Authorize(Roles = UserRoles.Admin)]
+        public async Task<Result<User?>> RegisterAdmin([FromBody] RegisterModel model)
+        {
+            var user = await _context.Users.CreateAsync(model, new List<string>() { UserRoles.User, UserRoles.Admin });
+
+            var claims = new List<Claim>
+                {
+                    new Claim(ClaimTypes.Name, model.UserName),
+                    new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+                    new Claim(ClaimTypes.Role, UserRoles.User),
+                    new Claim(ClaimTypes.Role, UserRoles.Manager),
+                    new Claim(ClaimTypes.Role, UserRoles.Admin),
+                    new Claim("IsActive", true.ToString())
+                };
+
+            var token = new JwtSecurityTokenHandler().WriteToken(JwtHelper.GetToken(claims, _configuration));
+
+            return new Result<User?>()
+            {
+                Token = token,
+                Value = user
             };
         }
 

@@ -24,88 +24,61 @@ namespace Watch.WebApi.Controllers
             _configuration = configuration;
         }
 
-        //TODO delete comments
-
-        //[HttpGet("")]
-        //[Authorize]
-        //public async Task<Result<List<Order>>> Get()
-        //{
-        //    await _context.Users.CheckUserAsync(User.Identity);
-
-        //    if(!User.IsInRole(UserRoles.User)) 
-        //    {
-        //        throw new ForbiddenException();
-        //    }
-
-        //    var username = User.FindFirst(c => c.Type == ClaimTypes.Name);
-
-        //    if (username == null)
-        //    {
-        //        throw new InternalServerException();
-        //    }
-
-        //    var user = await _context.Users.GetByUserNameAsync(username.Value);
-
-        //    if (user == null)
-        //    {
-        //        throw new UserNotFoundException(username.Value);
-        //    }
-
-        //    var orders = (await _context.Orders.GetByUserIdAsync(user.Id)).ToList();
-
-        //    return new Result<List<Order>>
-        //    {
-        //        Value = orders,
-        //        Hits = orders.Count,
-        //        Token = new JwtSecurityTokenHandler().WriteToken(JwtHelper.GetToken(User.Claims, _configuration))
-        //    };
-        //}
-
-
-        //TODO It needs? To get absolutely all orders?
         [HttpGet("")]
-        //TODO delete comments
-        //[HttpGet("all")]
-        [Authorize(Roles = UserRoles.Manager)]
-        //public async Task<Result<List<Order>>> GetAll()
-        public async Task<Result<List<Order>>> Get()
-        {
-            await _context.Users.CheckUserAsync(User.Identity);
-            var orders = (await _context.Orders.GetAsync()).ToList();
-
-            return new Result<List<Order>>
-            {
-                Value = orders,
-                Hits = orders.Count,
-                Token = new JwtSecurityTokenHandler().WriteToken(JwtHelper.GetToken(User.Claims, _configuration))
-            };
-        }
-
-        [HttpGet("/user/{userId}")]
         [Authorize]
-        public async Task<Result<List<Order>>> GetByUserId(string userId)
+        public async Task<Result<List<Order>>> Get([FromQuery]bool? isUser, [FromQuery]bool? isManager, [FromQuery]List<int>? statusses)
         {
             await _context.Users.CheckUserAsync(User.Identity);
-            var username = User.FindFirst(c => c.Type == ClaimTypes.Name);
 
-            if (username == null)
+            List<Order> orders = (await _context.Orders.GetAsync()).ToList();
+
+            if (isManager != null && isManager == true)
             {
-                throw new InternalServerException();
+                if (!User.IsInRole(UserRoles.Manager))
+                {
+                    throw new ForbiddenException();
+                }
+
+                var username = User.FindFirst(c => c.Type == ClaimTypes.Name);
+
+                if (username == null)
+                {
+                    throw new InternalServerException();
+                }
+
+                var user = await _context.Users.GetByUserNameAsync(username.Value);
+
+                if (user == null)
+                {
+                    throw new UserNotFoundException(username.Value);
+                }
+
+                orders = orders.Where(item => item.Manager != null && item.Manager.Id == user.Id).ToList();
             }
 
-            var user = await _context.Users.GetByUserNameAsync(username.Value);
-
-            if (user == null)
+            if (isUser != null && isUser == true)
             {
-                throw new UserNotFoundException(userId);
+                var username = User.FindFirst(c => c.Type == ClaimTypes.Name);
+
+                if (username == null)
+                {
+                    throw new InternalServerException();
+                }
+
+                var user = await _context.Users.GetByUserNameAsync(username.Value);
+
+                if (user == null)
+                {
+                    throw new UserNotFoundException(username.Value);
+                }
+
+                orders = orders.Where(item => item.UserId == user.Id).ToList();
             }
 
-            if (user.Id != userId)
+            if(statusses != null && statusses.Count > 0)
             {
-                throw new ForbiddenException();
+                orders = orders.Where(item => item.Status != null && statusses.Contains(item.Status.Id)).ToList();
             }
-
-            var orders = (await _context.Orders.GetByUserIdAsync(userId)).ToList();
 
             return new Result<List<Order>>
             {
@@ -115,14 +88,52 @@ namespace Watch.WebApi.Controllers
             };
         }
 
-        [HttpGet("/manager/{managerId}")]
+        //TODO check this
+        [HttpGet("sales")]
         [Authorize(Roles = UserRoles.Manager)]
-        public async Task<Result<List<Order>>> GetByManagerId(string managerId)
+        public async Task<Result<List<Watch.DataAccess.UI.Models.Order>>> Get(
+                                                        [FromQuery] int? watchId = null,
+                                                        [FromQuery] int? brandId = null,
+                                                        [FromQuery] int? collectionId = null,
+                                                        [FromQuery] int? styleId = null,
+                                                        [FromQuery] int? movementTypeId = null,
+                                                        [FromQuery] int? glassTypeId = null,
+                                                        [FromQuery] int? countryId = null,
+                                                        [FromQuery] int? caseShapeId = null,
+                                                        [FromQuery] int? caseMaterialId = null,
+                                                        [FromQuery] int? strapTypeId = null,
+                                                        [FromQuery] int? caseColorId = null,
+                                                        [FromQuery] int? strapColorId = null,
+                                                        [FromQuery] int? dialColorId = null,
+                                                        [FromQuery] int? functionId = null,
+                                                        [FromQuery] int? waterResistanceId = null,
+                                                        [FromQuery] int? incrustationTypeId = null,
+                                                        [FromQuery] int? dialTypeId = null,
+                                                        [FromQuery] int? genderId = null)
         {
-            await _context.Users.CheckUserAsync(User.Identity);
-            var username = User.FindFirst(c => c.Type == ClaimTypes.Name);
+            var filters = new OrderFilter
+            {
+                WatchId = watchId,
+                BrandId = brandId,
+                CollectionId = collectionId,
+                DialTypeId = dialTypeId,
+                DialColorId = dialColorId,
+                CountryId = countryId,
+                StrapColorId = strapColorId,
+                StrapTypeId = strapTypeId,
+                GenderId = genderId,
+                CaseColorId = caseColorId,
+                CaseMaterialId = caseMaterialId,
+                CaseShapeId = caseShapeId,
+                GlassTypeId = glassTypeId,
+                IncrustationTypeId = incrustationTypeId,
+                MovementTypeId = movementTypeId,
+                StyleId = styleId,
+                WaterResistanceId = waterResistanceId,
+                FunctionId = functionId
+            };
 
-            var orders = (await _context.Orders.GetByManagerIdAsync(managerId)).ToList();
+            var orders = await _context.Orders.GetAsync(filters);
 
             return new Result<List<Order>>
             {
@@ -157,12 +168,7 @@ namespace Watch.WebApi.Controllers
                 throw new InternalServerException();
             }
 
-            if (order.Manager == null)
-            {
-                throw new UserNotFoundException();
-            }
-
-            if (user.Id != order.UserId && user.Id != order.Manager.Id)
+            if (user.Id != order.UserId && order.Manager != null && user.Id != order.Manager.Id)
             {
                 throw new ForbiddenException();
             }
@@ -176,7 +182,7 @@ namespace Watch.WebApi.Controllers
 
         [HttpPost("")]
         [Authorize]
-        public async Task<Result<Order>> Create()
+        public async Task<Result<Order>> Create([FromBody]OrderAdditionalInfo info)
         {
             await _context.Users.CheckUserAsync(User.Identity);
             var username = User.FindFirst(c => c.Type == ClaimTypes.Name);
@@ -200,7 +206,7 @@ namespace Watch.WebApi.Controllers
                 throw new BasketNotFoundException();
             }
 
-            var res = await _context.Orders.CreateAsync(basket);
+            var res = await _context.Orders.CreateAsync(basket, info);
             return new Result<Order>
             {
                 Value = res,
@@ -213,7 +219,7 @@ namespace Watch.WebApi.Controllers
         //Close order
         [HttpPut("{id:int}")]
         [Authorize(Roles = UserRoles.Manager)]
-        public async Task<Result<bool>> Update(int id)
+        public async Task<Result<bool>> Update(int id, [FromQuery] int? statusId, [FromQuery] string? en)
         {
             await _context.Users.CheckUserAsync(User.Identity);
 
@@ -238,17 +244,51 @@ namespace Watch.WebApi.Controllers
                 throw new OrderNotFoundException(id);
             }
 
-            if (order.Manager == null)
+            if (order.Manager == null && order.Status != null && order.Status.Id != 1)
             {
                 throw new UserNotFoundException();
             }
 
-            if (user.Id != order.Manager.Id)
+            else if (order.Manager != null && user.Id != order.Manager.Id)
             {
                 throw new ForbiddenException();
             }
 
-            var res = await _context.Orders.CloseOrderAsync(id);
+            bool res = true;
+
+            if (statusId != null) 
+            {
+                switch(statusId)
+                {
+                    case 2:
+                        res = await _context.Orders.AcceptOrderAsync(id, user.Id); 
+                        break;
+
+                    case 3:
+                        res = await _context.Orders.CloseOrderAsync(id);
+                        break;
+
+                    case 4:
+                        res = await _context.Orders.CancelOrderAsync(id);
+                        break;
+
+                    case 5:
+                    case 6:
+                        res = await _context.Orders.SetOrderStatusAsync(id, (int)statusId);
+                        break;
+
+                    default:
+                        res = false; 
+                        break;
+                }
+            }
+
+            if(en != null)
+            {
+                order.EN = en;
+                await _context.Orders.UpdateAsync(order);
+            }
+
             return new Result<bool>
             {
                 Value = res,
@@ -284,12 +324,8 @@ namespace Watch.WebApi.Controllers
                 throw new OrderNotFoundException(id);
             }
 
-            if(order.Manager == null)
-            {
-                throw new UserNotFoundException();
-            }
 
-            if (user.Id != order.UserId && user.Id != order.Manager.Id)
+            if (user.Id != order.UserId && order.Manager != null && user.Id != order.Manager.Id)
             {
                 throw new ForbiddenException();
             }

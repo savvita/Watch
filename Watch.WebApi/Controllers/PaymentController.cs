@@ -7,6 +7,7 @@ using Watch.DataAccess;
 using Watch.Domain.Models;
 using Watch.Domain.Roles;
 using Watch.DataAccess.UI;
+using Watch.WebApi.Helpers;
 
 namespace Watch.WebApi.Controllers
 {

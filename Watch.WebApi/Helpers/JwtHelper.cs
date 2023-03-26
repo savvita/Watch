@@ -4,7 +4,7 @@ using System.Security.Claims;
 using System.Text;
 using Watch.DataAccess.UI.Exceptions;
 
-namespace Watch.WebApi.Controllers
+namespace Watch.WebApi.Helpers
 {
     public static class JwtHelper
     {

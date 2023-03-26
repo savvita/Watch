@@ -130,6 +130,26 @@ namespace Watch.DataAccess.Repositories
                     }
                 }
 
+                var images = _db.Images.Where(x => x.WatchModelId == model.Id).ToList();
+                var selectedImages = entity.Images.ToList();
+
+
+                foreach (var i in images)
+                {
+                    if(!selectedImages.Select(x => x.Id).Contains(i.Id))
+                    {
+                        model.Images.Remove(i);
+                    }
+                }
+
+                foreach (var i in selectedImages)
+                {
+                    if (!images.Select(x => x.Id).Contains(i.Id))
+                    {
+                        model.Images.Add(i);
+                    }
+                }
+
                 _db.Watches.Update(model);
                 await _db.SaveChangesAsync();
 

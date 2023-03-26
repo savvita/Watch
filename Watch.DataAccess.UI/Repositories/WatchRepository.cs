@@ -45,7 +45,6 @@ namespace Watch.DataAccess.UI.Repositories
 
         public async Task<Watch.DataAccess.UI.Models.Watch?> GetAsync(int id)
         {
-            //TODO check properties
             var model = await _db.Watches.GetAsync(id);
 
             if(model == null)
@@ -53,37 +52,11 @@ namespace Watch.DataAccess.UI.Repositories
                 return null;
             }
 
-            //model.Category = await _db.Categories.GetAsync(model.CategoryId);
-            //model.Producer = await _db.Producers.GetAsync(model.ProducerId);
-
             return new Watch.DataAccess.UI.Models.Watch(model);
         }
 
-        //TODO delete comments
-        //public async Task<IEnumerable<Models.Watch>> GetAsync(  string? model, 
-        //                                                        List<int>? categoryIds = null, 
-        //                                                        List<int>? producerIds = null, 
-        //                                                        decimal? minPrice = null, 
-        //                                                        decimal? maxPrice = null, 
-        //                                                        bool? onSale = null,
-        //                                                        bool? isPopular = null)
-        //{
-        //    var models = await _db.Watches.GetAsync(model, categoryIds, producerIds, minPrice, maxPrice, onSale, isPopular);
-
-        //    foreach (var m in models)
-        //    {
-        //        m.Category = await _db.Categories.GetAsync(m.CategoryId);
-        //        m.Producer = await _db.Producers.GetAsync(m.ProducerId);
-        //    }
-
-
-        //    return models.Select((model) => new Watch.DataAccess.UI.Models.Watch(model));
-        //}
-
         public async Task<Result<IEnumerable<Models.Watch>>> GetAsync(int page, int perPage, WatchFilter? filters = null)
         {
-            //TODO check this
-            //TODO check properties
             var models = await _db.Watches.GetAsync(page, perPage, filters != null ? (WatchFilterModel)filters : null);
 
             if(models.Value == null)

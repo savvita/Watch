@@ -9,6 +9,7 @@ using Watch.Domain.Roles;
 using Watch.DataAccess.UI;
 using System.Security.Claims;
 using Watch.DataAccess.UI.Exceptions;
+using Watch.WebApi.Helpers;
 
 namespace Watch.WebApi.Controllers
 {

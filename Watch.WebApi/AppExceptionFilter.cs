@@ -81,6 +81,16 @@ namespace Watch.WebApi
                         StatusCode = (int)HttpStatusCode.NotFound
                     };
                 }
+                else if (context.Exception is FileNotFoundException)
+                {
+                    context.Result = new ObjectResult(new
+                    {
+                        code = "file-not-found"
+                    })
+                    {
+                        StatusCode = (int)HttpStatusCode.NotFound
+                    };
+                }
                 else if (context.Exception is ReviewNotFoundException)
                 {
                     context.Result = new ObjectResult(new

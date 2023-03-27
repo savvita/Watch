@@ -9,7 +9,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Watch.Domain", "Watch.Domai
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Watch.WebApi", "Watch.WebApi\Watch.WebApi.csproj", "{E5FD836B-98F9-4114-BD3F-B02D0D0B2AC5}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Watch.DataAccess.UI", "Watch.DataAccess.UI\Watch.DataAccess.UI.csproj", "{E86B9A06-51F4-4C38-8948-DFE0E00297AE}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Watch.DataAccess.UI", "Watch.DataAccess.UI\Watch.DataAccess.UI.csproj", "{E86B9A06-51F4-4C38-8948-DFE0E00297AE}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Watch.NovaPoshta", "Watch.NovaPoshta\Watch.NovaPoshta.csproj", "{4E86604F-FFE4-428D-B360-2DD93739EF1E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -33,6 +35,10 @@ Global
 		{E86B9A06-51F4-4C38-8948-DFE0E00297AE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E86B9A06-51F4-4C38-8948-DFE0E00297AE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E86B9A06-51F4-4C38-8948-DFE0E00297AE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4E86604F-FFE4-428D-B360-2DD93739EF1E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4E86604F-FFE4-428D-B360-2DD93739EF1E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4E86604F-FFE4-428D-B360-2DD93739EF1E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4E86604F-FFE4-428D-B360-2DD93739EF1E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

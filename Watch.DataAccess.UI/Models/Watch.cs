@@ -41,9 +41,10 @@ namespace Watch.DataAccess.UI.Models
         public string? Description { get; set; }
         public List<Image> Images { get; } = new List<Image>();
         public List<Function> Functions { get; } = new List<Function>();
+        public List<Review> Reviews { get; } = new List<Review>();
 
         [Timestamp]
-        public byte[] RowVersion { get; set; }
+        public byte[]? RowVersion { get; set; }
         public Watch()
         {
         }
@@ -138,6 +139,7 @@ namespace Watch.DataAccess.UI.Models
             }
 
             model.Functions.ToList().ForEach(f => Functions.Add(new Function(f)));
+            model.Reviews.ToList().ForEach(f => Reviews.Add(new Review(f)));
             model.Images.ToList().ForEach(i => Images.Add(new Image(i)));
 
             RowVersion = model.RowVersion;
@@ -178,6 +180,7 @@ namespace Watch.DataAccess.UI.Models
 
             entity.Functions.ForEach(f => model.Functions.Add((FunctionModel)f));
             entity.Images.ForEach(i => model.Images.Add((ImageModel)i));
+            entity.Reviews.ForEach(i => model.Reviews.Add((ReviewModel)i));
 
 
             return model;

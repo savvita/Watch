@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using System.Linq;
 using Watch.Domain.Interfaces;
 using Watch.Domain.Models;
 
@@ -36,6 +37,9 @@ namespace Watch.DataAccess.Repositories
                 .Include(w => w.IncrustationType)
                 .Include(w => w.DialType)
                 .Include(w => w.Gender)
+                .Include(w => w.Images)
+                .Include(w => w.Functions)
+                .Include(w => w.Reviews)
                 .ToList();
 
             return e.ElementAt(0);
@@ -72,13 +76,81 @@ namespace Watch.DataAccess.Repositories
             return entity;
         }
 
-        //TODO Important! Check this
+        //TODO Important! Check this. Check functions updating
 
         public async Task<ConcurrencyUpdateResultModel> UpdateConcurrencyAsync(WatchModel entity)
         {
             try
             {
-                _db.Watches.Update(entity);
+                var model = (await _db.Watches.Include(x => x.Functions).FirstAsync(x => x.Id == entity.Id));
+                model.Available = entity.Available;
+                model.BrandId = entity.BrandId;
+                model.CaseColorId = entity.CaseColorId;
+                model.CaseMaterialId = entity.CaseMaterialId;
+                model.CaseSize = entity.CaseShapeId;
+                model.CaseSize = entity.CaseSize;
+                model.CollectionId = entity.CollectionId;
+                model.Description = entity.Description;
+                model.DialColorId = entity.DialColorId;
+                model.DialTypeId = entity.DialTypeId;
+                model.Discount = entity.Discount;
+                model.GenderId = entity.GenderId;
+                model.GlassTypeId = entity.GlassTypeId;
+                model.IncrustationTypeId = entity.IncrustationTypeId;
+                model.IsTop = entity.IsTop;
+                model.Model = entity.Model;
+                model.MovementTypeId = entity.MovementTypeId;
+                model.OnSale = entity.OnSale;
+                model.Price = entity.Price;
+                model.StrapColorId = entity.StrapColorId;
+                model.StrapTypeId = entity.StrapTypeId;
+                model.StyleId = entity.StyleId;
+                model.Title = entity.Title;
+                model.WaterResistanceId = entity.WaterResistanceId;
+                model.Weight = entity.Weight;
+
+                var selectedFunctions = entity.Functions.Select(x => x.Id).ToList();
+                var functions = model.Functions.Select(x => x.Id).ToList();
+
+                foreach (var f in _db.Functions)
+                {
+                    if(selectedFunctions.Contains(f.Id))
+                    {
+                        if (!functions.Contains(f.Id))
+                        {
+                            model.Functions.Add(f);
+                        }
+                        else
+                        {
+                            if(functions.Contains(f.Id))
+                            {
+                                model.Functions.Remove(f);
+                            }
+                        }
+                    }
+                }
+
+                var images = _db.Images.Where(x => x.WatchModelId == model.Id).ToList();
+                var selectedImages = entity.Images.ToList();
+
+
+                foreach (var i in images)
+                {
+                    if(!selectedImages.Select(x => x.Id).Contains(i.Id))
+                    {
+                        model.Images.Remove(i);
+                    }
+                }
+
+                foreach (var i in selectedImages)
+                {
+                    if (!images.Select(x => x.Id).Contains(i.Id))
+                    {
+                        model.Images.Add(i);
+                    }
+                }
+
+                _db.Watches.Update(model);
                 await _db.SaveChangesAsync();
 
                 return new ConcurrencyUpdateResultModel()

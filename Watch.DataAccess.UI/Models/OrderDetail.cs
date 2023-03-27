@@ -10,6 +10,7 @@
 
         public int Count { get; set; }
         public int OrderId { get; set; }
+        public Watch? Watch { get; set; }
 
         public OrderDetail()
         {
@@ -22,6 +23,11 @@
             WatchId = model.WatchId;
             OrderId = model.OrderId;
             Count = model.Count;
+
+            if(model.Watch != null)
+            {
+                Watch = new Watch(model.Watch);
+            }
         }
 
         public static explicit operator OrderDetailModel(OrderDetail entity)

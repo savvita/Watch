@@ -18,6 +18,7 @@ namespace Watch.DataAccess.UI.Models
         public string? UserName { get; set; }
 
         public string? Email { get; set; }
+        public string? PhoneNumber { get; set; }
 
         public bool IsActive { get; set; }
 
@@ -38,6 +39,7 @@ namespace Watch.DataAccess.UI.Models
             LastName = model.LastName;
             Email = model.Email;
             IsActive = model.IsActive;
+            PhoneNumber = model.PhoneNumber;
         }
 
         public static explicit operator UserModel(User entity)
@@ -50,7 +52,8 @@ namespace Watch.DataAccess.UI.Models
                 SecondName = entity.SecondName,
                 LastName = entity.LastName,
                 IsActive = entity.IsActive,
-                Email = entity.Email
+                Email = entity.Email,
+                PhoneNumber = entity.PhoneNumber
             };
         }
     }

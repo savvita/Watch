@@ -1,5 +1,4 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using System.Linq;
 using Watch.Domain.Interfaces;
 using Watch.Domain.Models;
 
@@ -47,6 +46,11 @@ namespace Watch.DataAccess.Repositories
 
         public new async Task<WatchModel?> CreateAsync(WatchModel entity)
         {
+            if(entity.Price < 0 || entity.Discount < 0 || entity.Discount > 100)
+            {
+                return null;
+            }
+
             var functions = new List<FunctionModel>(entity.Functions);
             entity.Functions.Clear();
 
@@ -80,6 +84,14 @@ namespace Watch.DataAccess.Repositories
 
         public async Task<ConcurrencyUpdateResultModel> UpdateConcurrencyAsync(WatchModel entity)
         {
+            if (entity.Price < 0 || entity.Discount < 0 || entity.Discount > 100)
+            {
+                return new ConcurrencyUpdateResultModel()
+                {
+                    Code = 409,
+                    Message = "Validation error"
+                };
+            }
             try
             {
                 var model = (await _db.Watches.Include(x => x.Functions).FirstAsync(x => x.Id == entity.Id));
@@ -260,55 +272,5 @@ namespace Watch.DataAccess.Repositories
         {
             return await Task.FromResult<IEnumerable<WatchModel>>(_db.Watches.Where(predicate));
         }
-
-        // TODO remove comments
-
-        //public async Task<IEnumerable<WatchModel>> GetAsync(string? model,
-        //                                                       List<int>? producerIds = null,
-        //                                                       decimal? minPrice = null,
-        //                                                       decimal? maxPrice = null,
-        //                                                       bool? onSale = null,
-        //                                                       bool? isPopular = null)
-        //{
-        //    var watches = _db.Watches.Include(w => w.Brand).ToList();
-
-        //    if(model != null)
-        //    {
-        //        model = model.ToLower();
-        //        watches = watches
-        //            .Where(w => w.Model.ToLower().Contains(model) || w.Brand != null && w.Brand.BrandName.ToLower().Contains(model))
-        //            .ToList();
-        //    }
-
-        //    //if (producerIds != null)
-        //    //{
-        //    //    watches = watches.Where(w => producerIds.Contains(w.BrandId)).ToList();
-        //    //}
-
-        //    if (minPrice != null)
-        //    {
-        //        watches = watches.Where(w => w.Price >= minPrice).ToList();
-        //    }
-
-        //    if (maxPrice != null)
-        //    {
-        //        watches = watches.Where(w => w.Price <= maxPrice).ToList();
-        //    }
-
-        //    if (onSale != null)
-        //    {
-        //        watches = watches.Where(w => w.OnSale == onSale).ToList();
-        //    }
-
-        //    if (isPopular != null)
-        //    {
-        //        watches = watches.Where(w => w.IsTop == isPopular).ToList();
-        //    }
-
-
-        //    watches = watches.ToList();
-
-        //    return watches;
-        //}
     }
 }

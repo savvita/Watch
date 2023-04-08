@@ -29,6 +29,21 @@ namespace Watch.DataAccess.Repositories
             return true;
         }
 
+        public async Task<List<ReviewModel>> GetByUserIdAsync(string userId)
+        {
+            var models = await Task.FromResult(_db.Reviews.Where(x => x.UserId == userId).ToList());
+
+            models.ForEach(model =>
+            {
+                if (model.Deleted)
+                {
+                    model.Text = "";
+                }
+            });
+
+            return models;
+        }
+
         public async Task<List<ReviewModel>> GetByWatchIdAsync(int watchId)
         {
             var models = await Task.FromResult(_db.Reviews.Where(x => x.WatchId == watchId).ToList());

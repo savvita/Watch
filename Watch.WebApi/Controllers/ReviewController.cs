@@ -43,6 +43,49 @@ namespace Watch.WebApi.Controllers
             };
         }
 
+        [HttpGet("user")]
+        [Authorize]
+        public async Task<Result<List<Review>>> GetByUser([FromQuery]string? id)
+        {
+            await _context.Users.CheckUserAsync(User.Identity);
+            var username = User.FindFirst(c => c.Type == ClaimTypes.Name);
+
+            if (username == null)
+            {
+                throw new InternalServerException();
+            }
+
+            var user = await _context.Users.GetByUserNameAsync(username.Value);
+
+            if (user == null)
+            {
+                throw new UserNotFoundException(username.Value);
+            }
+
+            if (id == null && !User.IsInRole(UserRoles.Manager))
+            {
+                throw new ForbiddenException();
+            }
+
+            List<Review> res = new List<Review>();
+
+            if(id == null)
+            {
+                res = await _context.Reviews.GetByUserIdAsync(user.Id);
+            }
+            else if(User.IsInRole(UserRoles.Manager))
+            {
+                res = await _context.Reviews.GetByUserIdAsync(id);
+            }
+
+            return new Result<List<Review>>
+            {
+                Value = res,
+                Hits = res.Count,
+                Token = new JwtSecurityTokenHandler().WriteToken(JwtHelper.GetToken(User.Claims, _configuration))
+            };
+        }
+
         [HttpGet("watch/{watchId:int}")]
         public async Task<Result<List<Review>>> Get(int watchId)
         {

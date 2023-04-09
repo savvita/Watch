@@ -89,6 +89,23 @@ namespace Watch.WebApi.Controllers
             };
         }
 
+        [HttpGet("user/{id}")]
+        [Authorize(Roles = UserRoles.Manager)]
+        public async Task<Result<List<Order>>> Get(string id)
+        {
+            await _context.Users.CheckUserAsync(User.Identity);
+
+            var res = (await _context.Orders.GetByUserIdAsync(id)).ToList();
+           
+
+            return new Result<List<Order>>
+            {
+                Value = res,
+                Hits = res.Count,
+                Token = new JwtSecurityTokenHandler().WriteToken(JwtHelper.GetToken(User.Claims, _configuration))
+            };
+        }
+
         [HttpGet("sales")]
         [Authorize(Roles = UserRoles.Manager)]
         public async Task<Result<List<Watch.DataAccess.UI.Models.Order>>> Get(
@@ -216,7 +233,6 @@ namespace Watch.WebApi.Controllers
         }
 
 
-        //Close order
         [HttpPut("{id:int}")]
         [Authorize(Roles = UserRoles.Manager)]
         public async Task<Result<bool>> Update(int id, [FromQuery] int? statusId, [FromQuery] string? en)

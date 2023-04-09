@@ -83,7 +83,7 @@ namespace Watch.DataAccess.UI.Repositories
         //TODO load city, warehouse and other?
         public async Task<IEnumerable<Order>> GetByUserIdAsync(string userId)
         {
-            var models = await _db.Orders.GetByUserIdAsync(userId);
+            var models = (await _db.Orders.GetByUserIdAsync(userId)).ToList();
             var statuses = await _db.OrderStatuses.GetAsync();
             var payments = await _db.Payments.GetAsync();
             var deliveries = await _db.Deliveries.GetAsync();

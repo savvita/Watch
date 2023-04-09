@@ -301,8 +301,7 @@ namespace Watch.WebApi.Controllers
 
             if(en != null)
             {
-                order.EN = en;
-                await _context.Orders.UpdateAsync(order);
+                await _context.Orders.SetENAsync(id, en);
             }
 
             return new Result<bool>

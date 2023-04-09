@@ -28,7 +28,6 @@ namespace Watch.DataAccess.UI.Repositories
             return await _db.Orders.DeleteAsync(id);
         }
 
-        //TODO load city, warehouse and other?
         public async Task<IEnumerable<Order>> GetAsync()
         {
             var models = await _db.Orders.GetAsync();
@@ -80,7 +79,6 @@ namespace Watch.DataAccess.UI.Repositories
             };
         }
 
-        //TODO load city, warehouse and other?
         public async Task<IEnumerable<Order>> GetByUserIdAsync(string userId)
         {
             var models = (await _db.Orders.GetByUserIdAsync(userId)).ToList();
@@ -134,6 +132,11 @@ namespace Watch.DataAccess.UI.Repositories
         public async Task<bool> SetOrderStatusAsync(int id, int statusId)
         {
             return await _db.Orders.SetOrderStatusAsync(id, statusId);
+        }
+
+        public async Task<bool> SetENAsync(int id, string en)
+        {
+            return await _db.Orders.SetENAsync(id, en);
         }
 
         public async Task<bool> CancelOrderAsync(int orderId)

@@ -64,6 +64,21 @@ namespace Watch.DataAccess.Repositories
             return true;
         }
 
+        public async Task<bool> SetENAsync(int id, string en)
+        {
+            var order = _db.Orders.FirstOrDefault(o => o.Id == id);
+            if (order == null || order.StatusId == 3)
+            {
+                return false;
+            }
+
+            order.EN = en;
+            order.StatusId = 7;
+            _db.Orders.Update(order);
+            await _db.SaveChangesAsync();
+            return true;
+        }
+
         public async Task<bool> CancelOrderAsync(int id)
         {
             var res = await SetOrderStatusAsync(id, 4);

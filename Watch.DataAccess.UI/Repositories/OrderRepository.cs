@@ -156,7 +156,7 @@ namespace Watch.DataAccess.UI.Repositories
 
         public async Task<List<Order>> GetAsync(OrderFilter filters)
         {
-            return (await _db.Orders.GetAsync((OrderFilterModel)filters)).Select(x => new Order(x)).ToList();
+            return (await _db.Orders.GetAsync((OrderFilterModel)filters)).Where(x => x != null).Select(x => new Order(x)).ToList();
         }
     }
 }

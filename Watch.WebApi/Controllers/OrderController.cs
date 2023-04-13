@@ -106,6 +106,7 @@ namespace Watch.WebApi.Controllers
             };
         }
 
+
         [HttpGet("sales")]
         [Authorize(Roles = UserRoles.Manager)]
         public async Task<Result<List<Watch.DataAccess.UI.Models.Order>>> Get(
@@ -128,6 +129,8 @@ namespace Watch.WebApi.Controllers
                                                         [FromQuery] int? dialTypeId = null,
                                                         [FromQuery] int? genderId = null)
         {
+            await _context.Users.CheckUserAsync(User.Identity);
+
             var filters = new OrderFilter
             {
                 WatchId = watchId,

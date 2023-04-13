@@ -86,6 +86,7 @@ namespace Watch.WebApi.Controllers
                                                         [FromQuery] List<int?>? incrustationTypeIds = null,
                                                         [FromQuery] List<int?>? dialTypeIds = null,
                                                         [FromQuery] List<int?>? genderIds = null,
+                                                        [FromQuery] List<int?>? functionIds = null,
                                                         [FromQuery] decimal? minPrice = null,
                                                         [FromQuery] decimal? maxPrice = null,
                                                         [FromQuery] List<bool>? onSale = null,
@@ -112,6 +113,7 @@ namespace Watch.WebApi.Controllers
                 StrapColorId = strapColorIds ?? new List<int?>(),
                 StrapTypeId = strapTypeIds ?? new List<int?>(),
                 StyleId = styleIds ?? new List<int?>(),
+                FunctionId = functionIds ?? new List<int?>(),
                 WaterResistanceId = waterResistanceIds ?? new List<int?>()
             };
 

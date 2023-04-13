@@ -80,7 +80,7 @@ namespace Watch.DataAccess.Repositories
             return entity;
         }
 
-        //TODO Important! Check this. Check functions updating
+        //TODO Important! Check functions updating
 
         public async Task<ConcurrencyUpdateResultModel> UpdateConcurrencyAsync(WatchModel entity)
         {
@@ -203,7 +203,7 @@ namespace Watch.DataAccess.Repositories
 
             if (filters != null) {
                 watches = _db.Watches
-                .Where(w => (w.Model.Contains(filters.Model) || filters.Model.Length == 0) &&
+                .Where(w => (w.Title.Contains(filters.Model) || filters.Model.Length == 0) &&
                             (filters.BrandId.Contains(w.BrandId) || filters.BrandId.Count == 0) &&
                             (filters.CollectionId.Contains(w.CollectionId) || filters.CollectionId.Count == 0) &&
                             (filters.StyleId.Contains(w.StyleId) || filters.StyleId.Count == 0) &&
@@ -223,31 +223,18 @@ namespace Watch.DataAccess.Repositories
                             (filters.IsTop.Contains(w.IsTop) || filters.IsTop.Count == 0) &&
                             (w.Price >= filters.MinPrice || filters.MinPrice == null) &&
                             (w.Price <= filters.MaxPrice || filters.MaxPrice == null));
+
+                if(filters.FunctionId.Count != 0)
+                {
+                    watches = watches.Include(w => w.Functions);
+                    watches = watches.AsEnumerable().Where(watch => filters.FunctionId.All(filter => watch.Functions.FirstOrDefault(f => f.Id == filter) != null)).AsQueryable();
+                }
             }
 
             var result = new ResultModel<List<WatchModel>>()
             {
                 Hits = watches.Count()
             };
-
-            //watches = watches
-            //    .Skip((page - 1) * perPage)
-            //    .Take(perPage)
-            //    .Include(w => w.Brand)
-            //    .Include(w => w.Collection)
-            //    .Include(w => w.Style)
-            //    .Include(w => w.MovementType)
-            //    .Include(w => w.GlassType)
-            //    .Include(w => w.CaseShape)
-            //    .Include(w => w.CaseMaterial)
-            //    .Include(w => w.StrapType)
-            //    .Include(w => w.CaseColor)
-            //    .Include(w => w.StrapColor)
-            //    .Include(w => w.DialColor)
-            //    .Include(w => w.WaterResistance)
-            //    .Include(w => w.IncrustationType)
-            //    .Include(w => w.DialType)
-            //    .Include(w => w.Gender);
 
             watches = watches
                 .Skip((page - 1) * perPage)

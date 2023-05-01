@@ -2,5 +2,6 @@
 {
     public interface IStyleRepository : IGenericRepository<Style>
     {
+        Task<List<Sale>> GetSalesAsync();
     }
 }

@@ -2,5 +2,6 @@
 {
     public interface IBrandRepository : IGenericRepository<Brand>
     {
+        Task<List<Sale>> GetSalesAsync();
     }
 }

@@ -8,6 +8,7 @@ namespace Watch.DataAccess.UI.Interfaces
         Task<User?> GetAsync(string id);
         Task<bool> DeleteAsync(string id);
         Task<bool> RestoreAsync(string id);
+        Task<User> UpdateAsync(User entity, bool updateRoles);
 
         Task<User?> CreateAsync(RegisterModel entity, IEnumerable<string> roles);
         Task<IEnumerable<string>> GetRolesAsync(UserModel entity);

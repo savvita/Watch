@@ -1,7 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using Watch.DataAccess;
 using Watch.DataAccess.UI;
@@ -85,9 +84,27 @@ namespace Watch.WebApi.Controllers
             {
                 Value = orders,
                 Hits = orders.Count,
-                Token = new JwtSecurityTokenHandler().WriteToken(JwtHelper.GetToken(User.Claims, _configuration))
+                Token = await JwtHelper.GetTokenAsync(_context, User, _configuration)
             };
         }
+
+        [HttpGet("user/{id}")]
+        [Authorize(Roles = UserRoles.Manager)]
+        public async Task<Result<List<Order>>> Get(string id)
+        {
+            await _context.Users.CheckUserAsync(User.Identity);
+
+            var res = (await _context.Orders.GetByUserIdAsync(id)).ToList();
+           
+
+            return new Result<List<Order>>
+            {
+                Value = res,
+                Hits = res.Count,
+                Token = await JwtHelper.GetTokenAsync(_context, User, _configuration)
+            };
+        }
+
 
         [HttpGet("sales")]
         [Authorize(Roles = UserRoles.Manager)]
@@ -111,6 +128,8 @@ namespace Watch.WebApi.Controllers
                                                         [FromQuery] int? dialTypeId = null,
                                                         [FromQuery] int? genderId = null)
         {
+            await _context.Users.CheckUserAsync(User.Identity);
+
             var filters = new OrderFilter
             {
                 WatchId = watchId,
@@ -139,7 +158,7 @@ namespace Watch.WebApi.Controllers
             {
                 Value = orders,
                 Hits = orders.Count,
-                Token = new JwtSecurityTokenHandler().WriteToken(JwtHelper.GetToken(User.Claims, _configuration))
+                Token = await JwtHelper.GetTokenAsync(_context, User, _configuration)
             };
         }
 
@@ -176,7 +195,7 @@ namespace Watch.WebApi.Controllers
             {
                 Value = order,
                 Hits = order != null ? 1 : 0,
-                Token = new JwtSecurityTokenHandler().WriteToken(JwtHelper.GetToken(User.Claims, _configuration))
+                Token = await JwtHelper.GetTokenAsync(_context, User, _configuration)
             };
         }
 
@@ -211,12 +230,11 @@ namespace Watch.WebApi.Controllers
             {
                 Value = res,
                 Hits = res != null ? 1 : 0,
-                Token = new JwtSecurityTokenHandler().WriteToken(JwtHelper.GetToken(User.Claims, _configuration))
+                Token = await JwtHelper.GetTokenAsync(_context, User, _configuration)
             };
         }
 
 
-        //Close order
         [HttpPut("{id:int}")]
         [Authorize(Roles = UserRoles.Manager)]
         public async Task<Result<bool>> Update(int id, [FromQuery] int? statusId, [FromQuery] string? en)
@@ -285,15 +303,14 @@ namespace Watch.WebApi.Controllers
 
             if(en != null)
             {
-                order.EN = en;
-                await _context.Orders.UpdateAsync(order);
+                await _context.Orders.SetENAsync(id, en);
             }
 
             return new Result<bool>
             {
                 Value = res,
                 Hits = res == true ? 1 : 0,
-                Token = new JwtSecurityTokenHandler().WriteToken(JwtHelper.GetToken(User.Claims, _configuration))
+                Token = await JwtHelper.GetTokenAsync(_context, User, _configuration)
             };
         }
 
@@ -336,7 +353,7 @@ namespace Watch.WebApi.Controllers
             {
                 Value = res,
                 Hits = res == true ? 1 : 0,
-                Token = new JwtSecurityTokenHandler().WriteToken(JwtHelper.GetToken(User.Claims, _configuration))
+                Token = await JwtHelper.GetTokenAsync(_context, User, _configuration)
             };
         }
     }

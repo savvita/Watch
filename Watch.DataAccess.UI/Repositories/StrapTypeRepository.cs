@@ -12,9 +12,26 @@ namespace Watch.DataAccess.UI.Repositories
 
         public async Task<StrapType?> CreateAsync(StrapType entity)
         {
+            entity.Value = entity.Value.Trim();
             var model = await _db.StrapTypes.CreateAsync((StrapTypeModel)entity);
             return model != null ? new StrapType(model) : null;
 
+        }
+
+        public async Task<List<Sale>> GetSalesAsync()
+        {
+            var models = await _db.StrapTypes.GetSalesAsync();
+            var entities = new List<Sale>();
+
+            foreach (var model in models)
+            {
+                if (model != null)
+                {
+                    entities.Add(new Sale(model));
+                }
+            }
+
+            return entities;
         }
 
         public async Task<bool> DeleteAsync(int id)
@@ -37,6 +54,7 @@ namespace Watch.DataAccess.UI.Repositories
 
         public async Task<StrapType> UpdateAsync(StrapType entity)
         {
+            entity.Value = entity.Value.Trim();
             var model = await _db.StrapTypes.UpdateAsync((StrapTypeModel)entity);
 
             return new StrapType(model);

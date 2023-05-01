@@ -143,69 +143,6 @@ namespace Watch.DataAccess.UnitOfWorks
                     return null;
                 }
             }
-            //foreach (var detail in basket.Details)
-            //{
-            //    var watch = _db.Watches.FirstOrDefault(w => w.Id == detail.WatchId);
-            //    if (watch == null || watch.Available < detail.Count || watch.OnSale == false)
-            //    {
-            //        return null;
-            //    }
-            //}
-
-            //var order = await Orders.CreateAsync(new OrderModel()
-            //{
-            //    Date = DateTime.Now,
-            //    StatusId = 1,
-            //    UserId = basket.UserId
-            //});
-
-            //if(order == null)
-            //{
-            //    return null;
-            //}
-
-            //foreach (var detail in basket.Details)
-            //{
-            //    if (!(await AddDetailToOrderAsync(order, detail))) return null;
-
-            //    // TODO Remove comments
-
-            //    //var watch = _db.Watches.FirstOrDefault(w => w.Id == detail.WatchId);
-            //    //if (watch == null || watch.Available < detail.Count)
-            //    //{
-            //    //    return null;
-            //    //}
-
-            //    //watch.Available -= detail.Count;
-
-            //    //if(watch.Available <= 0)
-            //    //{
-            //    //    watch.OnSale = false;
-            //    //}
-
-            //    //await Watches.UpdateAsync(watch);
-
-            //    //var d = await OrderDetails.CreateAsync(new OrderDetailModel()
-            //    //{
-            //    //    OrderId = order.Id,
-            //    //    WatchId = detail.WatchId,
-            //    //    UnitPrice = watch.Price,
-            //    //    Count = detail.Count
-            //    //});
-
-            //    //if(d == null)
-            //    //{
-            //    //    return null;
-            //    //}
-
-            //    //order.Details.Add(d);
-
-            //    //await BasketDetails.DeleteAsync(detail.Id);
-            //}
-
-            //await Baskets.DeleteAsync(basket.Id);
-
-            //return order;
         }
 
         private async Task<bool> AddDetailToOrderAsync(OrderModel order, BasketDetailModel detail)

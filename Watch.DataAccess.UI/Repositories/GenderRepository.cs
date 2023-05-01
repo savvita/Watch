@@ -17,9 +17,26 @@ namespace Watch.DataAccess.UI.Repositories
 
         public async Task<Gender?> CreateAsync(Gender entity)
         {
+            entity.Value = entity.Value.Trim();
             var model = await _db.Genders.CreateAsync((GenderModel)entity);
             return model != null ? new Gender(model) : null;
 
+        }
+
+        public async Task<List<Sale>> GetSalesAsync()
+        {
+            var models = await _db.Genders.GetSalesAsync();
+            var entities = new List<Sale>();
+
+            foreach (var model in models)
+            {
+                if (model != null)
+                {
+                    entities.Add(new Sale(model));
+                }
+            }
+
+            return entities;
         }
 
         public async Task<bool> DeleteAsync(int id)
@@ -42,6 +59,7 @@ namespace Watch.DataAccess.UI.Repositories
 
         public async Task<Gender> UpdateAsync(Gender entity)
         {
+            entity.Value = entity.Value.Trim();
             var model = await _db.Genders.UpdateAsync((GenderModel)entity);
 
             return new Gender(model);

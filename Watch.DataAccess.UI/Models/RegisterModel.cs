@@ -10,6 +10,7 @@ namespace Watch.DataAccess.UI.Models
         public string Password { get; set; } = null!;
         [Required]
         public string Email { get; set; } = null!;
+        public string? PhoneNumber{ get; set; }
 
         public string? FirstName { get; set; }
         public string? SecondName { get; set; }

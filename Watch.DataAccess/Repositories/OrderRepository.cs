@@ -64,6 +64,21 @@ namespace Watch.DataAccess.Repositories
             return true;
         }
 
+        public async Task<bool> SetENAsync(int id, string en)
+        {
+            var order = _db.Orders.FirstOrDefault(o => o.Id == id);
+            if (order == null || order.StatusId == 3)
+            {
+                return false;
+            }
+
+            order.EN = en;
+            order.StatusId = 7;
+            _db.Orders.Update(order);
+            await _db.SaveChangesAsync();
+            return true;
+        }
+
         public async Task<bool> CancelOrderAsync(int id)
         {
             var res = await SetOrderStatusAsync(id, 4);
@@ -166,9 +181,10 @@ namespace Watch.DataAccess.Repositories
             var w = watches.Select(w => w.Id);
 
             var res = await Task.FromResult(_db.OrderDetails
+                .Where(detail => detail.Order != null && (detail.Order.StatusId == 3 || detail.Order.StatusId == 7))
                 .Where(o => w.Contains(o.WatchId))
                 .Include(x => x.Order)
-                .ThenInclude(x => x.Details)
+                .ThenInclude(x => x!.Details.Where(o => w.Contains(o.WatchId)))
                 .Select(x => x.Order)
                 .ToList());
             return res;

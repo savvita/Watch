@@ -2,7 +2,9 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using Watch.DataAccess.UI;
 using Watch.DataAccess.UI.Exceptions;
+using Watch.Domain.Models;
 
 namespace Watch.WebApi.Helpers
 {
@@ -27,6 +29,41 @@ namespace Watch.WebApi.Helpers
                 );
 
             return token;
+        }
+
+        public static async Task<string?> GetTokenAsync(DbContext context, ClaimsPrincipal user, IConfiguration configuration)
+        {
+            var username = user.FindFirst(c => c.Type == ClaimTypes.Name);
+
+            if (username == null)
+            {
+                return null;
+            }
+
+            var _user = await context.Users.GetByUserNameAsync(username.Value);
+
+            if (_user == null)
+            {
+                return null;
+            }
+
+            if (_user.UserName == null)
+            {
+                return null;
+            }
+
+            var roles = (await context.Users.GetRolesAsync((UserModel)_user)).ToList();
+
+            var claims = new List<Claim>
+                {
+                    new Claim(ClaimTypes.Name, _user.UserName),
+                    new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+                    new Claim("IsActive", _user.IsActive.ToString())
+                };
+
+            roles.ForEach(role => claims.Add(new Claim(ClaimTypes.Role, role)));
+
+            return new JwtSecurityTokenHandler().WriteToken(JwtHelper.GetToken(claims, configuration));
         }
     }
 }

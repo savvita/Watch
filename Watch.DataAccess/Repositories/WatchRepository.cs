@@ -1,5 +1,4 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using System.Linq;
 using Watch.Domain.Interfaces;
 using Watch.Domain.Models;
 
@@ -47,6 +46,11 @@ namespace Watch.DataAccess.Repositories
 
         public new async Task<WatchModel?> CreateAsync(WatchModel entity)
         {
+            if(entity.Available < 0 || entity.Price < 0 || entity.Discount < 0 || entity.Discount > 100)
+            {
+                return null;
+            }
+
             var functions = new List<FunctionModel>(entity.Functions);
             entity.Functions.Clear();
 
@@ -76,10 +80,16 @@ namespace Watch.DataAccess.Repositories
             return entity;
         }
 
-        //TODO Important! Check this. Check functions updating
-
         public async Task<ConcurrencyUpdateResultModel> UpdateConcurrencyAsync(WatchModel entity)
         {
+            if (entity.Available < 0 || entity.Price < 0 || entity.Discount < 0 || entity.Discount > 100)
+            {
+                return new ConcurrencyUpdateResultModel()
+                {
+                    Code = 409,
+                    Message = "Validation error"
+                };
+            }
             try
             {
                 var model = (await _db.Watches.Include(x => x.Functions).FirstAsync(x => x.Id == entity.Id));
@@ -120,12 +130,13 @@ namespace Watch.DataAccess.Repositories
                         {
                             model.Functions.Add(f);
                         }
-                        else
+
+                    }
+                    else
+                    {
+                        if (functions.Contains(f.Id))
                         {
-                            if(functions.Contains(f.Id))
-                            {
-                                model.Functions.Remove(f);
-                            }
+                            model.Functions.Remove(f);
                         }
                     }
                 }
@@ -191,7 +202,7 @@ namespace Watch.DataAccess.Repositories
 
             if (filters != null) {
                 watches = _db.Watches
-                .Where(w => (w.Model.Contains(filters.Model) || filters.Model.Length == 0) &&
+                .Where(w => (w.Title.Contains(filters.Model) || filters.Model.Length == 0) &&
                             (filters.BrandId.Contains(w.BrandId) || filters.BrandId.Count == 0) &&
                             (filters.CollectionId.Contains(w.CollectionId) || filters.CollectionId.Count == 0) &&
                             (filters.StyleId.Contains(w.StyleId) || filters.StyleId.Count == 0) &&
@@ -211,31 +222,18 @@ namespace Watch.DataAccess.Repositories
                             (filters.IsTop.Contains(w.IsTop) || filters.IsTop.Count == 0) &&
                             (w.Price >= filters.MinPrice || filters.MinPrice == null) &&
                             (w.Price <= filters.MaxPrice || filters.MaxPrice == null));
+
+                if(filters.FunctionId.Count != 0)
+                {
+                    watches = watches.Include(w => w.Functions);
+                    watches = watches.AsEnumerable().Where(watch => filters.FunctionId.All(filter => watch.Functions.FirstOrDefault(f => f.Id == filter) != null)).AsQueryable();
+                }
             }
 
             var result = new ResultModel<List<WatchModel>>()
             {
                 Hits = watches.Count()
             };
-
-            //watches = watches
-            //    .Skip((page - 1) * perPage)
-            //    .Take(perPage)
-            //    .Include(w => w.Brand)
-            //    .Include(w => w.Collection)
-            //    .Include(w => w.Style)
-            //    .Include(w => w.MovementType)
-            //    .Include(w => w.GlassType)
-            //    .Include(w => w.CaseShape)
-            //    .Include(w => w.CaseMaterial)
-            //    .Include(w => w.StrapType)
-            //    .Include(w => w.CaseColor)
-            //    .Include(w => w.StrapColor)
-            //    .Include(w => w.DialColor)
-            //    .Include(w => w.WaterResistance)
-            //    .Include(w => w.IncrustationType)
-            //    .Include(w => w.DialType)
-            //    .Include(w => w.Gender);
 
             watches = watches
                 .Skip((page - 1) * perPage)
@@ -260,55 +258,5 @@ namespace Watch.DataAccess.Repositories
         {
             return await Task.FromResult<IEnumerable<WatchModel>>(_db.Watches.Where(predicate));
         }
-
-        // TODO remove comments
-
-        //public async Task<IEnumerable<WatchModel>> GetAsync(string? model,
-        //                                                       List<int>? producerIds = null,
-        //                                                       decimal? minPrice = null,
-        //                                                       decimal? maxPrice = null,
-        //                                                       bool? onSale = null,
-        //                                                       bool? isPopular = null)
-        //{
-        //    var watches = _db.Watches.Include(w => w.Brand).ToList();
-
-        //    if(model != null)
-        //    {
-        //        model = model.ToLower();
-        //        watches = watches
-        //            .Where(w => w.Model.ToLower().Contains(model) || w.Brand != null && w.Brand.BrandName.ToLower().Contains(model))
-        //            .ToList();
-        //    }
-
-        //    //if (producerIds != null)
-        //    //{
-        //    //    watches = watches.Where(w => producerIds.Contains(w.BrandId)).ToList();
-        //    //}
-
-        //    if (minPrice != null)
-        //    {
-        //        watches = watches.Where(w => w.Price >= minPrice).ToList();
-        //    }
-
-        //    if (maxPrice != null)
-        //    {
-        //        watches = watches.Where(w => w.Price <= maxPrice).ToList();
-        //    }
-
-        //    if (onSale != null)
-        //    {
-        //        watches = watches.Where(w => w.OnSale == onSale).ToList();
-        //    }
-
-        //    if (isPopular != null)
-        //    {
-        //        watches = watches.Where(w => w.IsTop == isPopular).ToList();
-        //    }
-
-
-        //    watches = watches.ToList();
-
-        //    return watches;
-        //}
     }
 }

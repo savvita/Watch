@@ -35,6 +35,8 @@ namespace Watch.Domain.Models
         public int? GenderId { get; set; }
         public double? Weight { get; set; }
         public decimal Price { get; set; }
+
+        [Range(0, 100)]
         public decimal? Discount { get; set; }
         public bool OnSale { get; set; }
         public bool IsTop { get; set; }

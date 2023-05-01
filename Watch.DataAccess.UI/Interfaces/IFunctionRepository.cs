@@ -2,5 +2,6 @@
 {
     public interface IFunctionRepository : IGenericRepository<Function>
     {
+        Task<List<Sale>> GetSalesAsync();
     }
 }

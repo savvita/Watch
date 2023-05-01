@@ -12,6 +12,7 @@ namespace Watch.DataAccess.UI.Repositories
 
         public async Task<Style?> CreateAsync(Style entity)
         {
+            entity.Value = entity.Value.Trim();
             var model = await _db.Styles.CreateAsync((StyleModel)entity);
             return model != null ? new Style(model) : null;
 
@@ -37,9 +38,26 @@ namespace Watch.DataAccess.UI.Repositories
 
         public async Task<Style> UpdateAsync(Style entity)
         {
+            entity.Value = entity.Value.Trim();
             var model = await _db.Styles.UpdateAsync((StyleModel)entity);
 
             return new Style(model);
+        }
+
+        public async Task<List<Sale>> GetSalesAsync()
+        {
+            var models = await _db.Styles.GetSalesAsync();
+            var entities = new List<Sale>();
+
+            foreach (var model in models)
+            {
+                if (model != null)
+                {
+                    entities.Add(new Sale(model));
+                }
+            }
+
+            return entities;
         }
     }
 }

@@ -1,7 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using System.IdentityModel.Tokens.Jwt;
 using Watch.DataAccess.UI.Models;
 using Watch.DataAccess;
 using Watch.Domain.Models;
@@ -39,7 +38,50 @@ namespace Watch.WebApi.Controllers
             {
                 Value = res.ToList(),
                 Hits = res.Count(),
-                Token = new JwtSecurityTokenHandler().WriteToken(JwtHelper.GetToken(User.Claims, _configuration))
+                Token = await JwtHelper.GetTokenAsync(_context, User, _configuration)
+            };
+        }
+
+        [HttpGet("user")]
+        [Authorize]
+        public async Task<Result<List<Review>>> GetByUser([FromQuery]string? id)
+        {
+            await _context.Users.CheckUserAsync(User.Identity);
+            var username = User.FindFirst(c => c.Type == ClaimTypes.Name);
+
+            if (username == null)
+            {
+                throw new InternalServerException();
+            }
+
+            var user = await _context.Users.GetByUserNameAsync(username.Value);
+
+            if (user == null)
+            {
+                throw new UserNotFoundException(username.Value);
+            }
+
+            if (id == null && !User.IsInRole(UserRoles.Manager))
+            {
+                throw new ForbiddenException();
+            }
+
+            List<Review> res = new List<Review>();
+
+            if(id == null)
+            {
+                res = await _context.Reviews.GetByUserIdAsync(user.Id);
+            }
+            else if(User.IsInRole(UserRoles.Manager))
+            {
+                res = await _context.Reviews.GetByUserIdAsync(id);
+            }
+
+            return new Result<List<Review>>
+            {
+                Value = res,
+                Hits = res.Count,
+                Token = await JwtHelper.GetTokenAsync(_context, User, _configuration)
             };
         }
 
@@ -51,8 +93,8 @@ namespace Watch.WebApi.Controllers
             return new Result<List<Review>>
             {
                 Value = values.ToList(),
-                Hits = values.Count(),
-                Token = User.Claims.Count() > 0 ? new JwtSecurityTokenHandler().WriteToken(JwtHelper.GetToken(User.Claims, _configuration)) : null
+                Hits = values.Count,
+                Token = await JwtHelper.GetTokenAsync(_context, User, _configuration)
             };
         }
 
@@ -65,7 +107,7 @@ namespace Watch.WebApi.Controllers
             {
                 Value = res,
                 Hits = res != null? 1 : 0,
-                Token = User.Claims.Count() > 0 ? new JwtSecurityTokenHandler().WriteToken(JwtHelper.GetToken(User.Claims, _configuration)) : null
+                Token = await JwtHelper.GetTokenAsync(_context, User, _configuration)
             };
         }
 
@@ -103,7 +145,7 @@ namespace Watch.WebApi.Controllers
             {
                 Value = res,
                 Hits = res != null ? 1 : 0,
-                Token = new JwtSecurityTokenHandler().WriteToken(JwtHelper.GetToken(User.Claims, _configuration))
+                Token = await JwtHelper.GetTokenAsync(_context, User, _configuration)
             };
         }
 
@@ -136,7 +178,7 @@ namespace Watch.WebApi.Controllers
             {
                 Value = await _context.Reviews.UpdateAsync(entity),
                 Hits = 1,
-                Token = new JwtSecurityTokenHandler().WriteToken(JwtHelper.GetToken(User.Claims, _configuration))
+                Token = await JwtHelper.GetTokenAsync(_context, User, _configuration)
             };
         }
 
@@ -176,7 +218,7 @@ namespace Watch.WebApi.Controllers
             {
                 Value = res,
                 Hits = res == true ? 1 : 0,
-                Token = new JwtSecurityTokenHandler().WriteToken(JwtHelper.GetToken(User.Claims, _configuration))
+                Token = await JwtHelper.GetTokenAsync(_context, User, _configuration)
             };
         }
     }

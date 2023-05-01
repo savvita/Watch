@@ -12,9 +12,26 @@ namespace Watch.DataAccess.UI.Repositories
 
         public async Task<CaseShape?> CreateAsync(CaseShape entity)
         {
+            entity.Value = entity.Value.Trim();
             var model = await _db.CaseShapes.CreateAsync((CaseShapeModel)entity);
             return model != null ? new CaseShape(model) : null;
 
+        }
+
+        public async Task<List<Sale>> GetSalesAsync()
+        {
+            var models = await _db.CaseShapes.GetSalesAsync();
+            var entities = new List<Sale>();
+
+            foreach (var model in models)
+            {
+                if (model != null)
+                {
+                    entities.Add(new Sale(model));
+                }
+            }
+
+            return entities;
         }
 
         public async Task<bool> DeleteAsync(int id)
@@ -37,6 +54,7 @@ namespace Watch.DataAccess.UI.Repositories
 
         public async Task<CaseShape> UpdateAsync(CaseShape entity)
         {
+            entity.Value = entity.Value.Trim();
             var model = await _db.CaseShapes.UpdateAsync((CaseShapeModel)entity);
 
             return new CaseShape(model);

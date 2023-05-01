@@ -15,6 +15,13 @@ namespace Watch.DataAccess.UI.Repositories
         }
         public async Task<User?> CreateAsync(User entity)
         {
+            entity.UserName = entity.UserName?.Trim();
+            entity.PhoneNumber = entity.PhoneNumber?.Trim();
+            entity.FirstName = entity.FirstName?.Trim();
+            entity.SecondName = entity.SecondName?.Trim();
+            entity.LastName = entity.LastName?.Trim();
+            entity.Email = entity.Email?.Trim();
+
             var user = await _db.UserManager.FindByNameAsync(entity.UserName);
 
             if (user != null)
@@ -29,6 +36,15 @@ namespace Watch.DataAccess.UI.Repositories
         
         public async Task<User?> CreateAsync(RegisterModel entity, IEnumerable<string> roles)
         {
+            entity.UserName = entity.UserName.Trim();
+            entity.PhoneNumber = entity.PhoneNumber?.Trim();
+            entity.FirstName = entity.FirstName?.Trim();
+            entity.SecondName = entity.SecondName?.Trim();
+            entity.LastName = entity.LastName?.Trim();
+            entity.Email = entity.Email.Trim();
+            entity.Password = entity.Password.Trim();
+
+
             var user = await _db.UserManager.FindByNameAsync(entity.UserName);
 
             if (user != null)
@@ -43,6 +59,7 @@ namespace Watch.DataAccess.UI.Repositories
                 FirstName = entity.FirstName,
                 SecondName = entity.SecondName,
                 LastName = entity.LastName,
+                PhoneNumber = entity.PhoneNumber,
                 IsActive = true,
                 SecurityStamp = Guid.NewGuid().ToString()
             };
@@ -142,8 +159,72 @@ namespace Watch.DataAccess.UI.Repositories
             return user;
         }
 
+        public async Task<User> UpdateAsync(User entity, bool updateRoles)
+        {
+            entity.UserName = entity.UserName?.Trim();
+            entity.PhoneNumber = entity.PhoneNumber?.Trim();
+            entity.FirstName = entity.FirstName?.Trim();
+            entity.SecondName = entity.SecondName?.Trim();
+            entity.LastName = entity.LastName?.Trim();
+            entity.Email = entity.Email?.Trim();
+
+            await UpdateAsync(entity);
+
+            var model = await _db.UserManager.FindByIdAsync(entity.Id);
+
+            if (model == null)
+            {
+                throw new UserNotFoundException(entity.Id);
+            }
+
+            if (updateRoles)
+            {
+                if (!await _db.Roles.RoleExistsAsync(UserRoles.Manager))
+                {
+                    await _db.Roles.CreateAsync(new IdentityRole(UserRoles.Manager));
+                }
+
+                if (!await _db.Roles.RoleExistsAsync(UserRoles.Admin))
+                {
+                    await _db.Roles.CreateAsync(new IdentityRole(UserRoles.Admin));
+                }
+
+
+                if (entity.IsAdmin)
+                {
+                    if (await _db.Roles.RoleExistsAsync(UserRoles.Admin))
+                        await _db.UserManager.AddToRoleAsync(model, UserRoles.Admin);
+                }
+                else
+                {
+                    if (await _db.Roles.RoleExistsAsync(UserRoles.Admin))
+                        await _db.UserManager.RemoveFromRoleAsync(model, UserRoles.Admin);
+                }
+
+                if (entity.IsManager)
+                {
+                    if (await _db.Roles.RoleExistsAsync(UserRoles.Manager))
+                        await _db.UserManager.AddToRoleAsync(model, UserRoles.Manager);
+                }
+                else
+                {
+                    if (await _db.Roles.RoleExistsAsync(UserRoles.Manager))
+                        await _db.UserManager.RemoveFromRoleAsync(model, UserRoles.Manager);
+                }
+            }
+
+            return entity;
+        }
+
         public async Task<User> UpdateAsync(User entity)
         {
+            entity.UserName = entity.UserName?.Trim();
+            entity.PhoneNumber = entity.PhoneNumber?.Trim();
+            entity.FirstName = entity.FirstName?.Trim();
+            entity.SecondName = entity.SecondName?.Trim();
+            entity.LastName = entity.LastName?.Trim();
+            entity.Email = entity.Email?.Trim();
+
             var model = await _db.UserManager.FindByIdAsync(entity.Id);
 
             if (model == null)
@@ -152,7 +233,7 @@ namespace Watch.DataAccess.UI.Repositories
             }
             var user = await _db.UserManager.FindByNameAsync(entity.UserName);
 
-            if(user != null && model.Id != user.Id)
+            if (user != null && model.Id != user.Id)
             {
                 throw new ConflictException();
             }
@@ -163,44 +244,11 @@ namespace Watch.DataAccess.UI.Repositories
             model.SecondName = entity.SecondName;
             model.LastName = entity.LastName;
             model.IsActive = entity.IsActive;
-            model.IsActive = entity.IsActive;
+            model.PhoneNumber = entity.PhoneNumber;
 
-            await _db.Users.UpdateAsync(model);
+            var res = await _db.Users.UpdateAsync(model);
 
-            if (!await _db.Roles.RoleExistsAsync(UserRoles.Manager))
-            {
-                await _db.Roles.CreateAsync(new IdentityRole(UserRoles.Manager));
-            }
-
-            if (!await _db.Roles.RoleExistsAsync(UserRoles.Admin))
-            {
-                await _db.Roles.CreateAsync(new IdentityRole(UserRoles.Admin));
-            }
-
-
-            if (entity.IsAdmin)
-            {
-                if (await _db.Roles.RoleExistsAsync(UserRoles.Admin))
-                    await _db.UserManager.AddToRoleAsync(model, UserRoles.Admin);
-            }
-            else
-            {
-                if (await _db.Roles.RoleExistsAsync(UserRoles.Admin))
-                    await _db.UserManager.RemoveFromRoleAsync(model, UserRoles.Admin);
-            }
-
-            if (entity.IsManager)
-            {
-                if (await _db.Roles.RoleExistsAsync(UserRoles.Manager))
-                    await _db.UserManager.AddToRoleAsync(model, UserRoles.Manager);
-            }
-            else
-            {
-                if (await _db.Roles.RoleExistsAsync(UserRoles.Manager))
-                    await _db.UserManager.RemoveFromRoleAsync(model, UserRoles.Manager);
-            }
-
-            return entity;
+            return new User(res);
         }
 
         public async Task<IEnumerable<string>> GetRolesAsync(UserModel entity)

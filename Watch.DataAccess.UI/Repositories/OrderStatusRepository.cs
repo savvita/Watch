@@ -12,6 +12,7 @@ namespace Watch.DataAccess.UI.Repositories
 
         public async Task<OrderStatus?> CreateAsync(OrderStatus entity)
         {
+            entity.Value = entity.Value.Trim();
             var model = await _db.OrderStatuses.CreateAsync((OrderStatusModel)entity);
             return model != null ? new OrderStatus(model) : null;
 
@@ -36,6 +37,7 @@ namespace Watch.DataAccess.UI.Repositories
 
         public async Task<OrderStatus> UpdateAsync(OrderStatus entity)
         {
+            entity.Value = entity.Value.Trim();
             var model = await _db.OrderStatuses.UpdateAsync((OrderStatusModel)entity);
 
             return new OrderStatus(model);

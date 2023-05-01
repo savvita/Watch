@@ -12,9 +12,26 @@ namespace Watch.DataAccess.UI.Repositories
 
         public async Task<GlassType?> CreateAsync(GlassType entity)
         {
+            entity.Value = entity.Value.Trim();
             var model = await _db.GlassTypes.CreateAsync((GlassTypeModel)entity);
             return model != null ? new GlassType(model) : null;
 
+        }
+
+        public async Task<List<Sale>> GetSalesAsync()
+        {
+            var models = await _db.GlassTypes.GetSalesAsync();
+            var entities = new List<Sale>();
+
+            foreach (var model in models)
+            {
+                if (model != null)
+                {
+                    entities.Add(new Sale(model));
+                }
+            }
+
+            return entities;
         }
 
         public async Task<bool> DeleteAsync(int id)
@@ -37,6 +54,7 @@ namespace Watch.DataAccess.UI.Repositories
 
         public async Task<GlassType> UpdateAsync(GlassType entity)
         {
+            entity.Value = entity.Value.Trim();
             var model = await _db.GlassTypes.UpdateAsync((GlassTypeModel)entity);
 
             return new GlassType(model);

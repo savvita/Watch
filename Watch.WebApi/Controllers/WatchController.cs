@@ -40,32 +40,9 @@ namespace Watch.WebApi.Controllers
             {
                 Value = watches,
                 Hits = watches == null ? 0 : watches.Count,
-                Token = User.Claims.Count() > 0 ? new JwtSecurityTokenHandler().WriteToken(JwtHelper.GetToken(User.Claims, _configuration)) : null
+                Token = await JwtHelper.GetTokenAsync(_context, User, _configuration)
             };
         }
-
-        //TODO delete comments
-
-        //[HttpGet("page/{page:int}")]
-        //public async Task<Result<List<Watch.DataAccess.UI.Models.Watch>>> Get(int page,
-        //                                                [FromQuery] int perPage,
-        //                                                [FromQuery] string? model,
-        //                                                [FromQuery] List<int>? categoryIds = null,
-        //                                                [FromQuery] List<int>? producerIds = null,
-        //                                                [FromQuery] decimal? minPrice = null,
-        //                                                [FromQuery] decimal? maxPrice = null,
-        //                                                [FromQuery] bool? onSale = null,
-        //                                                [FromQuery] bool? isPopular = null)
-        //{ 
-        //    var watches = (await _context.Watches.GetAsync(model, categoryIds!.Count > 0 ? categoryIds : null, producerIds!.Count > 0 ? producerIds : null, minPrice, maxPrice, onSale, isPopular)).ToList();
-
-        //    return new Result<List<Watch.DataAccess.UI.Models.Watch>>
-        //    {
-        //        Value = watches.Skip((page - 1) * perPage).Take(perPage).ToList(),
-        //        Hits = watches.Count(),
-        //        Token = User.Claims.Count() > 0 ? new JwtSecurityTokenHandler().WriteToken(JwtHelper.GetToken(User.Claims, _configuration)) : null
-        //    };
-        //}
 
         [HttpGet("page/{page:int}")]
         public async Task<Result<List<Watch.DataAccess.UI.Models.Watch>>> Get(int page,
@@ -86,6 +63,7 @@ namespace Watch.WebApi.Controllers
                                                         [FromQuery] List<int?>? incrustationTypeIds = null,
                                                         [FromQuery] List<int?>? dialTypeIds = null,
                                                         [FromQuery] List<int?>? genderIds = null,
+                                                        [FromQuery] List<int?>? functionIds = null,
                                                         [FromQuery] decimal? minPrice = null,
                                                         [FromQuery] decimal? maxPrice = null,
                                                         [FromQuery] List<bool>? onSale = null,
@@ -112,6 +90,7 @@ namespace Watch.WebApi.Controllers
                 StrapColorId = strapColorIds ?? new List<int?>(),
                 StrapTypeId = strapTypeIds ?? new List<int?>(),
                 StyleId = styleIds ?? new List<int?>(),
+                FunctionId = functionIds ?? new List<int?>(),
                 WaterResistanceId = waterResistanceIds ?? new List<int?>()
             };
 
@@ -121,7 +100,7 @@ namespace Watch.WebApi.Controllers
             {
                 Value = watches.Value != null ? watches.Value.ToList() : new List<DataAccess.UI.Models.Watch>(),
                 Hits = watches.Hits,
-                Token = User.Claims.Count() > 0 ? new JwtSecurityTokenHandler().WriteToken(JwtHelper.GetToken(User.Claims, _configuration)) : null
+                Token = await JwtHelper.GetTokenAsync(_context, User, _configuration)
             };
         }
 
@@ -133,7 +112,7 @@ namespace Watch.WebApi.Controllers
             {
                 Value = res,
                 Hits = res != null ? 1 : 0,
-                Token = User.Claims.Count() > 0 ? new JwtSecurityTokenHandler().WriteToken(JwtHelper.GetToken(User.Claims, _configuration)) : null
+                Token = await JwtHelper.GetTokenAsync(_context, User, _configuration)
             };
         }
 
@@ -160,11 +139,10 @@ namespace Watch.WebApi.Controllers
             {
                 Value = res,
                 Hits = res != null ? 1 : 0,
-                Token = new JwtSecurityTokenHandler().WriteToken(JwtHelper.GetToken(User.Claims, _configuration))
+                Token = await JwtHelper.GetTokenAsync(_context, User, _configuration)
             };
         }
 
-        //TODO Check this
         [HttpPut("")]
         [Authorize(Roles = UserRoles.Manager)]
         public async Task<Result<ConcurrencyUpdateResult>> Update([FromBody] Watch.DataAccess.UI.Models.Watch watch)
@@ -191,7 +169,7 @@ namespace Watch.WebApi.Controllers
             {
                 Value = res,
                 Hits = 1,
-                Token = new JwtSecurityTokenHandler().WriteToken(JwtHelper.GetToken(User.Claims, _configuration))
+                Token = await JwtHelper.GetTokenAsync(_context, User, _configuration)
             };
 
             //TODO delete comments
@@ -238,7 +216,7 @@ namespace Watch.WebApi.Controllers
             {
                 Value = res,
                 Hits = res == true ? 1 : 0,
-                Token = new JwtSecurityTokenHandler().WriteToken(JwtHelper.GetToken(User.Claims, _configuration))
+                Token = await JwtHelper.GetTokenAsync(_context, User, _configuration)
             };
         }
 
@@ -259,7 +237,7 @@ namespace Watch.WebApi.Controllers
             {
                 Value = res,
                 Hits = res == true ? 1 : 0,
-                Token = new JwtSecurityTokenHandler().WriteToken(JwtHelper.GetToken(User.Claims, _configuration))
+                Token = await JwtHelper.GetTokenAsync(_context, User, _configuration)
             };
         }
     }

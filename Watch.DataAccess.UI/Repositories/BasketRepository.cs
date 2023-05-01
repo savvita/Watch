@@ -94,21 +94,6 @@ namespace Watch.DataAccess.UI.Repositories
         public async Task<IEnumerable<Basket>> GetAsync()
         {
             return await Task.FromResult<List<Basket>>(new List<Basket>());
-            //TODO delete comments
-            //var models = await _db.Baskets.GetAsync();
-
-            //List<Basket> baskets = new List<Basket>();
-
-            //foreach (var model in models)
-            //{
-            //    var details = (await _db.BasketDetails.GetByBasketIdAsync(model.Id)).Select(model => new BasketDetail(model)).ToList();
-            //    baskets.Add(new Basket(model)
-            //    {
-            //        Details = details
-            //    });
-            //}
-
-            //return baskets;
         }
 
         public async Task<Basket?> GetAsync(int id)

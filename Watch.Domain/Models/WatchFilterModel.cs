@@ -18,6 +18,7 @@
         public List<int?> IncrustationTypeId { get; set; } = new List<int?>();
         public List<int?> DialTypeId { get; set; } = new List<int?>();
         public List<int?> GenderId { get; set; } = new List<int?>();
+        public List<int?> FunctionId { get; set; } = new List<int?>();
         public decimal? MinPrice { get; set; }
         public decimal? MaxPrice { get; set; }
         public List<bool> OnSale { get; set; } = new List<bool>();

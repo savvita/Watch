@@ -2,5 +2,6 @@
 {
     public interface ICountryRepository : IGenericRepository<Country>
     {
+        Task<List<Sale>> GetSalesAsync();
     }
 }

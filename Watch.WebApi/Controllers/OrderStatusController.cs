@@ -1,7 +1,5 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using StackExchange.Redis;
-using System.IdentityModel.Tokens.Jwt;
 using Watch.DataAccess;
 using Watch.DataAccess.UI;
 using Watch.DataAccess.UI.Models;
@@ -30,7 +28,7 @@ namespace Watch.WebApi.Controllers
             {
                 Value = values,
                 Hits = values.Count,
-                Token = User.Claims.Count() > 0 ? new JwtSecurityTokenHandler().WriteToken(JwtHelper.GetToken(User.Claims, _configuration)) : null
+                Token = await JwtHelper.GetTokenAsync(_context, User, _configuration)
             };
         }
     }

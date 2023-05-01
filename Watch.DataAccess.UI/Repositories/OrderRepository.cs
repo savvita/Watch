@@ -13,11 +13,29 @@ namespace Watch.DataAccess.UI.Repositories
 
         public async Task<Order?> CreateAsync(Basket basket, OrderAdditionalInfo info)
         {
+            info.PhoneNumber = info.PhoneNumber.Trim();
+            info.FullName = info.FullName.Trim();
             var model = await _db.CreateOrderAsync((BasketModel)basket, (OrderAdditionalInfoModel)info);
             return model != null ? new Order(model) : null;
         }
+
         public async Task<Order?> CreateAsync(Order entity)
         {
+            if (entity.EN != null)
+            {
+                entity.EN = entity.EN.Trim();
+            }
+
+            if (entity.FullName != null)
+            {
+                entity.FullName = entity.FullName.Trim();
+            }
+
+            if (entity.PhoneNumber != null)
+            {
+                entity.PhoneNumber = entity.PhoneNumber.Trim();
+            }
+
             var model = await _db.Orders.CreateAsync((OrderModel)entity);
 
             return model != null ? new Order(model) : null;
@@ -106,6 +124,21 @@ namespace Watch.DataAccess.UI.Repositories
 
         public async Task<Order> UpdateAsync(Order entity)
         {
+            if(entity.EN != null)
+            {
+                entity.EN = entity.EN.Trim();
+            }
+
+            if (entity.FullName != null)
+            {
+                entity.FullName = entity.FullName.Trim();
+            }
+
+            if (entity.PhoneNumber != null)
+            {
+                entity.PhoneNumber = entity.PhoneNumber.Trim();
+            }
+
             var model = await _db.Orders.UpdateAsync((OrderModel)entity);
 
             return new Order(model);
@@ -136,7 +169,7 @@ namespace Watch.DataAccess.UI.Repositories
 
         public async Task<bool> SetENAsync(int id, string en)
         {
-            return await _db.Orders.SetENAsync(id, en);
+            return await _db.Orders.SetENAsync(id, en.Trim());
         }
 
         public async Task<bool> CancelOrderAsync(int orderId)
@@ -156,7 +189,7 @@ namespace Watch.DataAccess.UI.Repositories
 
         public async Task<List<Order>> GetAsync(OrderFilter filters)
         {
-            return (await _db.Orders.GetAsync((OrderFilterModel)filters)).Where(x => x != null).Select(x => new Order(x)).ToList();
+            return (await _db.Orders.GetAsync((OrderFilterModel)filters)).Where(x => x != null).Select(x => new Order(x!)).ToList();
         }
     }
 }

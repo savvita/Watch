@@ -2,8 +2,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using System.IdentityModel.Tokens.Jwt;
-using System.Text.RegularExpressions;
 using Watch.DataAccess;
 using Watch.DataAccess.UI;
 using Watch.DataAccess.UI.Models;
@@ -82,7 +80,7 @@ namespace Watch.WebApi.Controllers
 
             foreach (var uploadedFile in Request.Form.Files)
             {
-                if (uploadedFile.Length > 100000 || !FileHelper.IsImage(uploadedFile))
+                if (uploadedFile.Length > 1024 * 1024 || !FileHelper.IsImage(uploadedFile))
                 {
                     continue;
                 }
@@ -93,7 +91,7 @@ namespace Watch.WebApi.Controllers
             {
                 Value = urls,
                 Hits = urls.Count,
-                Token = new JwtSecurityTokenHandler().WriteToken(JwtHelper.GetToken(User.Claims, _configuration))
+                Token = await JwtHelper.GetTokenAsync(_context, User, _configuration)
             };
         }
 
@@ -137,7 +135,7 @@ namespace Watch.WebApi.Controllers
             {
                 Value = res != null ? res.ToList() : new List<string>(),
                 Hits = res != null ? res.Count() : 0,
-                Token = new JwtSecurityTokenHandler().WriteToken(JwtHelper.GetToken(User.Claims, _configuration))
+                Token = await JwtHelper.GetTokenAsync(_context, User, _configuration)
             };
         }
 
@@ -166,7 +164,7 @@ namespace Watch.WebApi.Controllers
             {
                 Value = files.Count == count,
                 Hits = count,
-                Token = new JwtSecurityTokenHandler().WriteToken(JwtHelper.GetToken(User.Claims, _configuration))
+                Token = await JwtHelper.GetTokenAsync(_context, User, _configuration)
             };
         }
     }

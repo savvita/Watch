@@ -2,5 +2,6 @@
 {
     public interface IDialTypeRepository : IGenericRepository<DialType>
     {
+        Task<List<Sale>> GetSalesAsync();
     }
 }

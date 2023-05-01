@@ -12,9 +12,26 @@ namespace Watch.DataAccess.UI.Repositories
 
         public async Task<DialType?> CreateAsync(DialType entity)
         {
+            entity.Value = entity.Value.Trim();
             var model = await _db.DialTypes.CreateAsync((DialTypeModel)entity);
             return model != null ? new DialType(model) : null;
 
+        }
+
+        public async Task<List<Sale>> GetSalesAsync()
+        {
+            var models = await _db.DialTypes.GetSalesAsync();
+            var entities = new List<Sale>();
+
+            foreach (var model in models)
+            {
+                if (model != null)
+                {
+                    entities.Add(new Sale(model));
+                }
+            }
+
+            return entities;
         }
 
         public async Task<bool> DeleteAsync(int id)
@@ -37,6 +54,7 @@ namespace Watch.DataAccess.UI.Repositories
 
         public async Task<DialType> UpdateAsync(DialType entity)
         {
+            entity.Value = entity.Value.Trim();
             var model = await _db.DialTypes.UpdateAsync((DialTypeModel)entity);
 
             return new DialType(model);

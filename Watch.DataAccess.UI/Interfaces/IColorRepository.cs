@@ -2,5 +2,6 @@
 {
     public interface IColorRepository : IGenericRepository<Color>
     {
+        Task<List<Sale>> GetSalesAsync(string type);
     }
 }

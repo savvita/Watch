@@ -15,6 +15,13 @@ namespace Watch.DataAccess.UI.Repositories
         }
         public async Task<User?> CreateAsync(User entity)
         {
+            entity.UserName = entity.UserName?.Trim();
+            entity.PhoneNumber = entity.PhoneNumber?.Trim();
+            entity.FirstName = entity.FirstName?.Trim();
+            entity.SecondName = entity.SecondName?.Trim();
+            entity.LastName = entity.LastName?.Trim();
+            entity.Email = entity.Email?.Trim();
+
             var user = await _db.UserManager.FindByNameAsync(entity.UserName);
 
             if (user != null)
@@ -29,6 +36,15 @@ namespace Watch.DataAccess.UI.Repositories
         
         public async Task<User?> CreateAsync(RegisterModel entity, IEnumerable<string> roles)
         {
+            entity.UserName = entity.UserName.Trim();
+            entity.PhoneNumber = entity.PhoneNumber?.Trim();
+            entity.FirstName = entity.FirstName?.Trim();
+            entity.SecondName = entity.SecondName?.Trim();
+            entity.LastName = entity.LastName?.Trim();
+            entity.Email = entity.Email.Trim();
+            entity.Password = entity.Password.Trim();
+
+
             var user = await _db.UserManager.FindByNameAsync(entity.UserName);
 
             if (user != null)
@@ -145,6 +161,13 @@ namespace Watch.DataAccess.UI.Repositories
 
         public async Task<User> UpdateAsync(User entity, bool updateRoles)
         {
+            entity.UserName = entity.UserName?.Trim();
+            entity.PhoneNumber = entity.PhoneNumber?.Trim();
+            entity.FirstName = entity.FirstName?.Trim();
+            entity.SecondName = entity.SecondName?.Trim();
+            entity.LastName = entity.LastName?.Trim();
+            entity.Email = entity.Email?.Trim();
+
             await UpdateAsync(entity);
 
             var model = await _db.UserManager.FindByIdAsync(entity.Id);
@@ -195,6 +218,13 @@ namespace Watch.DataAccess.UI.Repositories
 
         public async Task<User> UpdateAsync(User entity)
         {
+            entity.UserName = entity.UserName?.Trim();
+            entity.PhoneNumber = entity.PhoneNumber?.Trim();
+            entity.FirstName = entity.FirstName?.Trim();
+            entity.SecondName = entity.SecondName?.Trim();
+            entity.LastName = entity.LastName?.Trim();
+            entity.Email = entity.Email?.Trim();
+
             var model = await _db.UserManager.FindByIdAsync(entity.Id);
 
             if (model == null)

@@ -1,7 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using System.IdentityModel.Tokens.Jwt;
 using Watch.DataAccess;
 using Watch.DataAccess.UI;
 using Watch.DataAccess.UI.Models;
@@ -31,8 +30,8 @@ namespace Watch.WebApi.Controllers
             return new Result<List<Warehouse>>
             {
                 Value = values,
-                Hits = values.Count(),
-                Token = User.Claims.Count() > 0 ? new JwtSecurityTokenHandler().WriteToken(JwtHelper.GetToken(User.Claims, _configuration)) : null
+                Hits = values.Count,
+                Token = await JwtHelper.GetTokenAsync(_context, User, _configuration)
             };
         }
 
@@ -46,7 +45,7 @@ namespace Watch.WebApi.Controllers
             {
                 Value = res,
                 Hits = 0,
-                Token = User.Claims.Count() > 0 ? new JwtSecurityTokenHandler().WriteToken(JwtHelper.GetToken(User.Claims, _configuration)) : null
+                Token = await JwtHelper.GetTokenAsync(_context, User, _configuration)
             };
         }
 
@@ -54,13 +53,18 @@ namespace Watch.WebApi.Controllers
         [Authorize(Roles = UserRoles.Admin)]
         public async Task<Result<bool>> Update()
         {
-            var res = await _context.Warehouses.UpdateAsync(_configuration["NP:ApiKey"], _configuration["NP:Url"]);
+            bool res = false;
+
+            if(_configuration["NP:ApiKey"] != null && _configuration["NP:Url"] != null)
+            {
+                res = await _context.Warehouses.UpdateAsync(_configuration["NP:ApiKey"]!, _configuration["NP:Url"]!);
+            }
 
             return new Result<bool>
             {
                 Value = res,
                 Hits = 0,
-                Token = User.Claims.Count() > 0 ? new JwtSecurityTokenHandler().WriteToken(JwtHelper.GetToken(User.Claims, _configuration)) : null
+                Token = await JwtHelper.GetTokenAsync(_context, User, _configuration)
             };
         }
 

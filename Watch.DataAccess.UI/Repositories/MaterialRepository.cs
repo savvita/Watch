@@ -12,9 +12,26 @@ namespace Watch.DataAccess.UI.Repositories
 
         public async Task<Material?> CreateAsync(Material entity)
         {
+            entity.Value = entity.Value.Trim();
             var model = await _db.Materials.CreateAsync((MaterialModel)entity);
             return model != null ? new Material(model) : null;
 
+        }
+
+        public async Task<List<Sale>> GetSalesAsync(string type)
+        {
+            var models = await _db.Materials.GetSalesAsync(type);
+            var entities = new List<Sale>();
+
+            foreach (var model in models)
+            {
+                if (model != null)
+                {
+                    entities.Add(new Sale(model));
+                }
+            }
+
+            return entities;
         }
 
         public async Task<bool> DeleteAsync(int id)
@@ -37,6 +54,7 @@ namespace Watch.DataAccess.UI.Repositories
 
         public async Task<Material> UpdateAsync(Material entity)
         {
+            entity.Value = entity.Value.Trim();
             var model = await _db.Materials.UpdateAsync((MaterialModel)entity);
 
             return new Material(model);

@@ -12,6 +12,7 @@ namespace Watch.DataAccess.UI.Repositories
 
         public async Task<Delivery?> CreateAsync(Delivery entity)
         {
+            entity.Value = entity.Value.Trim();
             var model = await _db.Deliveries.CreateAsync((DeliveryModel)entity);
             return model != null ? new Delivery(model) : null;
 
@@ -36,6 +37,7 @@ namespace Watch.DataAccess.UI.Repositories
 
         public async Task<Delivery> UpdateAsync(Delivery entity)
         {
+            entity.Value = entity.Value.Trim();
             var model = await _db.Deliveries.UpdateAsync((DeliveryModel)entity);
 
             return new Delivery(model);

@@ -12,6 +12,7 @@ namespace Watch.DataAccess.UI.Repositories
 
         public async Task<Payment?> CreateAsync(Payment entity)
         {
+            entity.Value = entity.Value.Trim();
             var model = await _db.Payments.CreateAsync((PaymentModel)entity);
             return model != null ? new Payment(model) : null;
 
@@ -36,6 +37,7 @@ namespace Watch.DataAccess.UI.Repositories
 
         public async Task<Payment> UpdateAsync(Payment entity)
         {
+            entity.Value = entity.Value.Trim();
             var model = await _db.Payments.UpdateAsync((PaymentModel)entity);
 
             return new Payment(model);

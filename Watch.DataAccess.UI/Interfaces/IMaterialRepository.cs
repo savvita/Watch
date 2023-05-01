@@ -2,5 +2,6 @@
 {
     public interface IMaterialRepository : IGenericRepository<Material>
     {
+        Task<List<Sale>> GetSalesAsync(string type);
     }
 }

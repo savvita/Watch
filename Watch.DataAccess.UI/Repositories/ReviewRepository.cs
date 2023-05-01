@@ -12,6 +12,7 @@ namespace Watch.DataAccess.UI.Repositories
 
         public async Task<Review?> CreateAsync(Review entity)
         {
+            entity.Text = entity.Text.Trim();
             var model = await _db.Reviews.CreateAsync((ReviewModel)entity);
             return model != null ? new Review(model) : null;
 
@@ -46,6 +47,7 @@ namespace Watch.DataAccess.UI.Repositories
 
         public async Task<Review> UpdateAsync(Review entity)
         {
+            entity.Text = entity.Text.Trim();
             var model = await _db.Reviews.UpdateAsync((ReviewModel)entity);
 
             return new Review(model);

@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Watch.DataAccess.UI.Interfaces;
+﻿using Watch.DataAccess.UI.Interfaces;
 
 namespace Watch.DataAccess.UI.Repositories
 {
@@ -17,9 +12,26 @@ namespace Watch.DataAccess.UI.Repositories
 
         public async Task<Function?> CreateAsync(Function entity)
         {
+            entity.Value = entity.Value.Trim();
             var model = await _db.Functions.CreateAsync((FunctionModel)entity);
             return model != null ? new Function(model) : null;
 
+        }
+
+        public async Task<List<Sale>> GetSalesAsync()
+        {
+            var models = await _db.Functions.GetSalesAsync();
+            var entities = new List<Sale>();
+
+            foreach (var model in models)
+            {
+                if (model != null)
+                {
+                    entities.Add(new Sale(model));
+                }
+            }
+
+            return entities;
         }
 
         public async Task<bool> DeleteAsync(int id)
@@ -41,6 +53,7 @@ namespace Watch.DataAccess.UI.Repositories
 
         public async Task<Function> UpdateAsync(Function entity)
         {
+            entity.Value = entity.Value.Trim();
             var model = await _db.Functions.UpdateAsync((FunctionModel)entity);
 
             return new Function(model);

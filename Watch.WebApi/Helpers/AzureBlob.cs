@@ -47,7 +47,7 @@ namespace Watch.WebApi.Helpers
                 var serviceClient = new BlobServiceClient(_connectionString);
                 var containerClient = serviceClient.GetBlobContainerClient(_containerName);
 
-                string fileName = Guid.NewGuid().ToString() + "_" + file.FileName;
+                string fileName = Guid.NewGuid().ToString() + "_" + file.FileName.Trim();
 
                 var blobClient = containerClient.GetBlobClient(fileName);
                 await blobClient.UploadAsync(file.OpenReadStream(), true);

@@ -38,7 +38,7 @@ namespace Watch.WebApi.Controllers
             {
                 Value = users,
                 Hits = users.Count,
-                Token = User.Claims.Count() > 0 ? new JwtSecurityTokenHandler().WriteToken(JwtHelper.GetToken(User.Claims, _configuration)) : null
+                Token = await JwtHelper.GetTokenAsync(_context, User, _configuration)
             };
         }
 
@@ -59,7 +59,7 @@ namespace Watch.WebApi.Controllers
             {
                 Value = user,
                 Hits = user != null ? 1 : 0,
-                Token = User.Claims.Count() > 0 ? new JwtSecurityTokenHandler().WriteToken(JwtHelper.GetToken(User.Claims, _configuration)) : null
+                Token = await JwtHelper.GetTokenAsync(_context, User, _configuration)
             };
         }
 
@@ -101,13 +101,11 @@ namespace Watch.WebApi.Controllers
             var res = await _context.Users.UpdateAsync(entity, User.IsInRole(UserRoles.Admin));
 
 
-            var token = await GetTokenAsync();
-
             return new Result<User>
             {
                 Value = res,
                 Hits = 1,
-                Token = token
+                Token = await JwtHelper.GetTokenAsync(_context, User, _configuration)
             };
         }
 
@@ -117,12 +115,12 @@ namespace Watch.WebApi.Controllers
         {
             await _context.Users.CheckUserAsync(User.Identity);
             var res = await _context.Users.RestoreAsync(id);
-            var token = await GetTokenAsync();
+
             return new Result<bool>
             {
                 Value = res,
                 Hits = res == true ? 1 : 0,
-                Token = token
+                Token = await JwtHelper.GetTokenAsync(_context, User, _configuration)
             };
         }
 
@@ -130,52 +128,76 @@ namespace Watch.WebApi.Controllers
         [Authorize]
         public async Task<Result<bool>> Delete(string id)
         {
-            //TODO add check - delete can only admin or user itself
             await _context.Users.CheckUserAsync(User.Identity);
+            if (User.Identity == null)
+            {
+                throw new ForbiddenException();
+            }
+
+            if (!User.IsInRole(UserRoles.Admin))
+            {
+                if (User.Identity.Name == null)
+                {
+                    throw new ForbiddenException();
+                }
+
+                var userToUpdate = await _context.Users.GetAsync(id);
+
+                if (userToUpdate == null)
+                {
+                    throw new UserNotFoundException(id);
+                }
+
+                var user = await _context.Users.GetByUserNameAsync(User.Identity.Name);
+
+                if (user == null || user.Id != userToUpdate.Id)
+                {
+                    throw new ForbiddenException();
+                }
+            }
             var res = await _context.Users.DeleteAsync(id);
 
-            var token = await GetTokenAsync();
             return new Result<bool>
             {
                 Value = res,
                 Hits = res == true ? 1 : 0,
-                Token = token
+                Token = await JwtHelper.GetTokenAsync(_context, User, _configuration)
             };
         }
 
-        private async Task<string> GetTokenAsync()
-        {
-            var username = User.FindFirst(c => c.Type == ClaimTypes.Name);
+        //private async Task<string> GetTokenAsync()
+        //{
+        //    var username = User.FindFirst(c => c.Type == ClaimTypes.Name);
 
-            if (username == null)
-            {
-                throw new InternalServerException();
-            }
+        //    if (username == null)
+        //    {
+        //        throw new InternalServerException();
+        //    }
 
-            var user = await _context.Users.GetByUserNameAsync(username.Value);
+        //    var user = await _context.Users.GetByUserNameAsync(username.Value);
 
-            if (user == null)
-            {
-                throw new UserNotFoundException(username.Value);
-            }
+        //    if (user == null)
+        //    {
+        //        throw new UserNotFoundException(username.Value);
+        //    }
 
-            if (user.UserName == null)
-            {
-                throw new InternalServerException();
-            }
+        //    if (user.UserName == null)
+        //    {
+        //        throw new InternalServerException();
+        //    }
 
-            var roles = (await _context.Users.GetRolesAsync((UserModel)user)).ToList();
+        //    var roles = (await _context.Users.GetRolesAsync((UserModel)user)).ToList();
 
-            var claims = new List<Claim>
-                {
-                    new Claim(ClaimTypes.Name, user.UserName),
-                    new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-                    new Claim("IsActive", user.IsActive.ToString())
-                };
+        //    var claims = new List<Claim>
+        //        {
+        //            new Claim(ClaimTypes.Name, user.UserName),
+        //            new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+        //            new Claim("IsActive", user.IsActive.ToString())
+        //        };
 
-            roles.ForEach(role => claims.Add(new Claim(ClaimTypes.Role, role)));
+        //    roles.ForEach(role => claims.Add(new Claim(ClaimTypes.Role, role)));
 
-            return new JwtSecurityTokenHandler().WriteToken(JwtHelper.GetToken(claims, _configuration));
-        }
+        //    return new JwtSecurityTokenHandler().WriteToken(JwtHelper.GetToken(claims, _configuration));
+        //}
     }
 }

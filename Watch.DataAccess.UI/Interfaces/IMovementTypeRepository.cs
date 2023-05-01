@@ -2,5 +2,6 @@
 {
     public interface IMovementTypeRepository : IGenericRepository<MovementType>
     {
+        Task<List<Sale>> GetSalesAsync();
     }
 }

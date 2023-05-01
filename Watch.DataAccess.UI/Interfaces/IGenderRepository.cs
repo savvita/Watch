@@ -2,5 +2,6 @@
 {
     public interface IGenderRepository : IGenericRepository<Gender>
     {
+        Task<List<Sale>> GetSalesAsync();
     }
 }

@@ -1,7 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using System.IdentityModel.Tokens.Jwt;
 using Watch.DataAccess;
 using Watch.DataAccess.UI;
 using Watch.DataAccess.UI.Models;
@@ -32,7 +31,7 @@ namespace Watch.WebApi.Controllers
             {
                 Value = values.ToList(),
                 Hits = values.Count(),
-                Token = User.Claims.Count() > 0 ? new JwtSecurityTokenHandler().WriteToken(JwtHelper.GetToken(User.Claims, _configuration)) : null
+                Token = await JwtHelper.GetTokenAsync(_context, User, _configuration)
             };
         }
 
@@ -44,7 +43,7 @@ namespace Watch.WebApi.Controllers
             {
                 Value = res,
                 Hits = await _context.Watches.Count.Country(id),
-                Token = User.Claims.Count() > 0 ? new JwtSecurityTokenHandler().WriteToken(JwtHelper.GetToken(User.Claims, _configuration)) : null
+                Token = await JwtHelper.GetTokenAsync(_context, User, _configuration)
             };
         }
 
@@ -58,7 +57,7 @@ namespace Watch.WebApi.Controllers
             {
                 Value = res,
                 Hits = res != null ? 1 : 0,
-                Token = new JwtSecurityTokenHandler().WriteToken(JwtHelper.GetToken(User.Claims, _configuration))
+                Token = await JwtHelper.GetTokenAsync(_context, User, _configuration)
             };
         }
 
@@ -71,7 +70,7 @@ namespace Watch.WebApi.Controllers
             {
                 Value = await _context.Countries.UpdateAsync(entity),
                 Hits = 1,
-                Token = new JwtSecurityTokenHandler().WriteToken(JwtHelper.GetToken(User.Claims, _configuration))
+                Token = await JwtHelper.GetTokenAsync(_context, User, _configuration)
             };
         }
 
@@ -85,7 +84,22 @@ namespace Watch.WebApi.Controllers
             {
                 Value = res,
                 Hits = res == true ? 1 : 0,
-                Token = new JwtSecurityTokenHandler().WriteToken(JwtHelper.GetToken(User.Claims, _configuration))
+                Token = await JwtHelper.GetTokenAsync(_context, User, _configuration)
+            };
+        }
+
+        [HttpGet("sales")]
+        [Authorize(Roles = UserRoles.Manager)]
+        public async Task<Result<List<Sale>>> GetSales()
+        {
+            await _context.Users.CheckUserAsync(User.Identity);
+            var res = await _context.Countries.GetSalesAsync();
+
+            return new Result<List<Sale>>
+            {
+                Value = res,
+                Hits = res.Count(),
+                Token = await JwtHelper.GetTokenAsync(_context, User, _configuration)
             };
         }
     }

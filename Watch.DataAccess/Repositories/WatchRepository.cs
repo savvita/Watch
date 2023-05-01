@@ -46,7 +46,7 @@ namespace Watch.DataAccess.Repositories
 
         public new async Task<WatchModel?> CreateAsync(WatchModel entity)
         {
-            if(entity.Price < 0 || entity.Discount < 0 || entity.Discount > 100)
+            if(entity.Available < 0 || entity.Price < 0 || entity.Discount < 0 || entity.Discount > 100)
             {
                 return null;
             }
@@ -80,11 +80,9 @@ namespace Watch.DataAccess.Repositories
             return entity;
         }
 
-        //TODO Important! Check functions updating
-
         public async Task<ConcurrencyUpdateResultModel> UpdateConcurrencyAsync(WatchModel entity)
         {
-            if (entity.Price < 0 || entity.Discount < 0 || entity.Discount > 100)
+            if (entity.Available < 0 || entity.Price < 0 || entity.Discount < 0 || entity.Discount > 100)
             {
                 return new ConcurrencyUpdateResultModel()
                 {
@@ -132,12 +130,13 @@ namespace Watch.DataAccess.Repositories
                         {
                             model.Functions.Add(f);
                         }
-                        else
+
+                    }
+                    else
+                    {
+                        if (functions.Contains(f.Id))
                         {
-                            if(functions.Contains(f.Id))
-                            {
-                                model.Functions.Remove(f);
-                            }
+                            model.Functions.Remove(f);
                         }
                     }
                 }

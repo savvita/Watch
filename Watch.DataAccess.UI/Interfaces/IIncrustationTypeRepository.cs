@@ -2,5 +2,6 @@
 {
     public interface IIncrustationTypeRepository : IGenericRepository<IncrustationType>
     {
+        Task<List<Sale>> GetSalesAsync();
     }
 }

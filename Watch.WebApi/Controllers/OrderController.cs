@@ -1,7 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using Watch.DataAccess;
 using Watch.DataAccess.UI;
@@ -85,7 +84,7 @@ namespace Watch.WebApi.Controllers
             {
                 Value = orders,
                 Hits = orders.Count,
-                Token = new JwtSecurityTokenHandler().WriteToken(JwtHelper.GetToken(User.Claims, _configuration))
+                Token = await JwtHelper.GetTokenAsync(_context, User, _configuration)
             };
         }
 
@@ -102,7 +101,7 @@ namespace Watch.WebApi.Controllers
             {
                 Value = res,
                 Hits = res.Count,
-                Token = new JwtSecurityTokenHandler().WriteToken(JwtHelper.GetToken(User.Claims, _configuration))
+                Token = await JwtHelper.GetTokenAsync(_context, User, _configuration)
             };
         }
 
@@ -159,7 +158,7 @@ namespace Watch.WebApi.Controllers
             {
                 Value = orders,
                 Hits = orders.Count,
-                Token = new JwtSecurityTokenHandler().WriteToken(JwtHelper.GetToken(User.Claims, _configuration))
+                Token = await JwtHelper.GetTokenAsync(_context, User, _configuration)
             };
         }
 
@@ -196,7 +195,7 @@ namespace Watch.WebApi.Controllers
             {
                 Value = order,
                 Hits = order != null ? 1 : 0,
-                Token = new JwtSecurityTokenHandler().WriteToken(JwtHelper.GetToken(User.Claims, _configuration))
+                Token = await JwtHelper.GetTokenAsync(_context, User, _configuration)
             };
         }
 
@@ -231,7 +230,7 @@ namespace Watch.WebApi.Controllers
             {
                 Value = res,
                 Hits = res != null ? 1 : 0,
-                Token = new JwtSecurityTokenHandler().WriteToken(JwtHelper.GetToken(User.Claims, _configuration))
+                Token = await JwtHelper.GetTokenAsync(_context, User, _configuration)
             };
         }
 
@@ -311,7 +310,7 @@ namespace Watch.WebApi.Controllers
             {
                 Value = res,
                 Hits = res == true ? 1 : 0,
-                Token = new JwtSecurityTokenHandler().WriteToken(JwtHelper.GetToken(User.Claims, _configuration))
+                Token = await JwtHelper.GetTokenAsync(_context, User, _configuration)
             };
         }
 
@@ -354,7 +353,7 @@ namespace Watch.WebApi.Controllers
             {
                 Value = res,
                 Hits = res == true ? 1 : 0,
-                Token = new JwtSecurityTokenHandler().WriteToken(JwtHelper.GetToken(User.Claims, _configuration))
+                Token = await JwtHelper.GetTokenAsync(_context, User, _configuration)
             };
         }
     }

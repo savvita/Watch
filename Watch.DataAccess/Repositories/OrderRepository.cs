@@ -181,9 +181,10 @@ namespace Watch.DataAccess.Repositories
             var w = watches.Select(w => w.Id);
 
             var res = await Task.FromResult(_db.OrderDetails
+                .Where(detail => detail.Order != null && (detail.Order.StatusId == 3 || detail.Order.StatusId == 7))
                 .Where(o => w.Contains(o.WatchId))
                 .Include(x => x.Order)
-                .ThenInclude(x => x.Details)
+                .ThenInclude(x => x!.Details.Where(o => w.Contains(o.WatchId)))
                 .Select(x => x.Order)
                 .ToList());
             return res;

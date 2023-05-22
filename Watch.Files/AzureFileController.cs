@@ -1,20 +1,20 @@
-﻿using Azure.Core;
-using Azure.Storage.Blobs;
-using Microsoft.Extensions.Azure;
+﻿using Azure.Storage.Blobs;
 using Microsoft.WindowsAzure.Storage;
 using Microsoft.WindowsAzure.Storage.Blob;
 
-namespace Watch.WebApi.Helpers
+namespace Watch.Files
 {
-    public class AzureBlob
+    public class AzureFileController : IFileController
     {
         private readonly string _connectionString;
         private readonly string _containerName;
+        private readonly string _rootPath;
 
-        public AzureBlob(string connectionString, string containerName)
+        public AzureFileController(string connectionString, string containerName, string rootPath)
         {
             _connectionString = connectionString;
             _containerName = containerName;
+            _rootPath = rootPath;
         }
 
         public async Task<bool> DeleteFileAsync(string fileName)
@@ -24,7 +24,7 @@ namespace Watch.WebApi.Helpers
                 var serviceClient = new BlobServiceClient(_connectionString);
                 var containerClient = serviceClient.GetBlobContainerClient(_containerName);
 
-                if(containerClient == null)
+                if (containerClient == null)
                 {
                     return false;
                 }
@@ -37,25 +37,6 @@ namespace Watch.WebApi.Helpers
             catch
             {
                 return false;
-            }
-        }
-
-        public async Task<string> UploadFileAsync(IFormFile file)
-        {
-            try
-            {
-                var serviceClient = new BlobServiceClient(_connectionString);
-                var containerClient = serviceClient.GetBlobContainerClient(_containerName);
-
-                string fileName = Guid.NewGuid().ToString() + "_" + file.FileName.Trim();
-
-                var blobClient = containerClient.GetBlobClient(fileName);
-                await blobClient.UploadAsync(file.OpenReadStream(), true);
-                return Path.Combine(ConfigurationManager.FileRoot, fileName);
-            }
-            catch
-            {
-                return string.Empty;
             }
         }
 
@@ -80,7 +61,7 @@ namespace Watch.WebApi.Helpers
             }
         }
 
-        public async Task<List<string>> GetBlobListAsync()
+        public async Task<List<string>> GetFileListAsync()
         {
             // Get Reference to Blob Container
             CloudStorageAccount storageAccount = CloudStorageAccount.Parse(_connectionString);
@@ -99,6 +80,23 @@ namespace Watch.WebApi.Helpers
                 fileUris.Add(blobItem.StorageUri.PrimaryUri.ToString());
             }
             return fileUris;
+        }
+
+        public async Task<string> UploadFileAsync(Stream stream, string filename)
+        {
+            try
+            {
+                var serviceClient = new BlobServiceClient(_connectionString);
+                var containerClient = serviceClient.GetBlobContainerClient(_containerName);
+
+                var blobClient = containerClient.GetBlobClient(filename);
+                await blobClient.UploadAsync(stream, true);
+                return Path.Combine(this._rootPath, filename);
+            }
+            catch
+            {
+                return string.Empty;
+            }
         }
     }
 }

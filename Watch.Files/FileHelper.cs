@@ -1,11 +1,13 @@
-﻿using System.Text.RegularExpressions;
+﻿using Microsoft.AspNetCore.Http;
+using System.Text.RegularExpressions;
 
-namespace Watch.WebApi.Helpers
+namespace Watch.Files
 {
     public static class FileHelper
     {
-
         private const int ImageMinimumBytes = 512;
+
+        public const int MaxSize = 1048576;
         public static bool IsImage(IFormFile file)
         {
             //-------------------------------------------

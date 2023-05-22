@@ -2,7 +2,6 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Memory;
-using System.IdentityModel.Tokens.Jwt;
 using Watch.DataAccess;
 using Watch.DataAccess.UI;
 using Watch.DataAccess.UI.Models;

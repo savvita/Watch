@@ -37,6 +37,7 @@ namespace Watch.DataAccess.UI.Repositories
         public async Task<bool> DeleteAsync(int id)
         {
             (await _db.Watches.Where(w => w.BrandId == id)).ToList().ForEach(w => w.BrandId = null);
+            (await _db.Promotions.Where(p => p.BrandId == id)).ToList().ForEach(p => { p.BrandId = null; p.IsActive = false; });
             return await _db.Brands.DeleteAsync(id);
         }
 

@@ -24,6 +24,7 @@
   <ItemGroup>
     <ProjectReference Include="..\Watch.DataAccess.UI\Watch.DataAccess.UI.csproj" />
     <ProjectReference Include="..\Watch.DataAccess\Watch.DataAccess.csproj" />
+    <ProjectReference Include="..\Watch.Files\Watch.Files.csproj" />
   </ItemGroup>
 
 </Project>

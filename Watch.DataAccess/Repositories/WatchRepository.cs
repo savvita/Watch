@@ -75,6 +75,19 @@ namespace Watch.DataAccess.Repositories
                 }
             }
 
+            var promotion = await _db.Promotions.LastOrDefaultAsync(x => x.IsActive);
+            if(promotion != null)
+            {
+                if(promotion.BrandId == null)
+                {
+                    entity.Discount = promotion.DiscountValue;
+                }
+                else if(promotion.BrandId == entity.BrandId)
+                {
+                    entity.Discount = promotion.DiscountValue;
+                }
+            }
+
             entity = (await _db.Watches.AddAsync(entity)).Entity;
             await _db.SaveChangesAsync();
             return entity;
@@ -97,7 +110,7 @@ namespace Watch.DataAccess.Repositories
                 model.BrandId = entity.BrandId;
                 model.CaseColorId = entity.CaseColorId;
                 model.CaseMaterialId = entity.CaseMaterialId;
-                model.CaseSize = entity.CaseShapeId;
+                model.CaseShapeId = entity.CaseShapeId;
                 model.CaseSize = entity.CaseSize;
                 model.CollectionId = entity.CollectionId;
                 model.Description = entity.Description;
@@ -158,6 +171,19 @@ namespace Watch.DataAccess.Repositories
                     if (!images.Select(x => x.Id).Contains(i.Id))
                     {
                         model.Images.Add(i);
+                    }
+                }
+
+                var promotion = await _db.Promotions.FirstOrDefaultAsync(x => x.IsActive);
+                if (promotion != null)
+                {
+                    if (promotion.BrandId == null)
+                    {
+                        model.Discount = promotion.DiscountValue;
+                    }
+                    else if (promotion.BrandId == entity.BrandId)
+                    {
+                        model.Discount = promotion.DiscountValue;
                     }
                 }
 

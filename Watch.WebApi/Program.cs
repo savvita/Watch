@@ -5,6 +5,7 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Watch.DataAccess;
 using Watch.Domain.Models;
+using Watch.Files;
 using Watch.WebApi;
 using ConfigurationManager = Watch.WebApi.ConfigurationManager;
 
@@ -32,6 +33,13 @@ builder.Services.AddDbContext<WatchDbContext>(options =>
 builder.Services.AddIdentity<UserModel, IdentityRole>()
     .AddEntityFrameworkStores<WatchDbContext>()
     .AddDefaultTokenProviders();
+
+builder.Services.AddScoped<IFileController>(options => 
+{
+    return new LocalFileController(builder.Configuration["RootPaths:LocalPath"], @"\images\watches\");
+    //return new LocalFileController(@"D:\html_source\React\watchshopmarket\public\images\watches\", @"\images\watches\");
+});
+
 
 //TODO change password requirements
 builder.Services.Configure<IdentityOptions>(options =>

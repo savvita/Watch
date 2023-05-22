@@ -54,6 +54,9 @@ namespace Watch.DataAccess.UnitOfWorks
         public ICityRepository Cities { get; }
         public IWarehouseRepository Warehouses { get; }
         public IReviewRepository Reviews { get; }
+        public ISlideRepository Slides{ get; }
+        public IPromotionRepository Promotions{ get; }
+        public ISlideTextRepository SlideTexts { get; }
 
         public UnitOfWorks(WatchDbContext context, UserManager<UserModel> userManager, RoleManager<IdentityRole> roleManager)
         {
@@ -86,6 +89,9 @@ namespace Watch.DataAccess.UnitOfWorks
             Cities = new CityRepository(context);
             Warehouses= new WarehouseRepository(context);
             Reviews = new ReviewRepository(context);
+            Slides = new SlideRepository(context);
+            Promotions = new PromotionRepository(context);
+            SlideTexts = new SlideTextRepository(context);
             UserManager = userManager;
             Roles = roleManager;
 

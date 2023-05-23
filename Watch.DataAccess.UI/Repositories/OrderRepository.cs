@@ -36,6 +36,11 @@ namespace Watch.DataAccess.UI.Repositories
                 entity.PhoneNumber = entity.PhoneNumber.Trim();
             }
 
+            if (entity.Comments != null)
+            {
+                entity.Comments = entity.Comments.Trim();
+            }
+
             var model = await _db.Orders.CreateAsync((OrderModel)entity);
 
             return model != null ? new Order(model) : null;
@@ -73,7 +78,6 @@ namespace Watch.DataAccess.UI.Repositories
             return orders;
         }
 
-        //TODO load city, warehouse and other?
         public async Task<Order?> GetAsync(int id)
         {
             var model = await _db.Orders.GetAsync(id);
@@ -139,9 +143,14 @@ namespace Watch.DataAccess.UI.Repositories
                 entity.PhoneNumber = entity.PhoneNumber.Trim();
             }
 
-            var model = await _db.Orders.UpdateAsync((OrderModel)entity);
+            if (entity.Comments != null)
+            {
+                entity.Comments = entity.Comments.Trim();
+            }
 
-            return new Order(model);
+            var model = await _db.Orders.UpdateConcurrencyAsync((OrderModel)entity);
+
+            return entity;
         }
 
         public async Task<IEnumerable<Order>> GetByManagerIdAsync(string managerId)

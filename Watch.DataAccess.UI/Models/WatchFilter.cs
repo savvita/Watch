@@ -23,6 +23,8 @@
         public decimal? MaxPrice { get; set; }
         public List<bool> OnSale { get; set; } = new List<bool>();
         public List<bool> IsTop { get; set; } = new List<bool>();
+        public string? Sorting { get; set; }
+        public string? SortingOrder { get; set; }
 
         public static explicit operator WatchFilterModel(WatchFilter entity)
         {
@@ -48,7 +50,9 @@
                 MinPrice = entity.MinPrice,
                 MaxPrice = entity.MaxPrice,
                 OnSale = entity.OnSale,
-                IsTop = entity.IsTop
+                IsTop = entity.IsTop,
+                Sorting = entity.Sorting,
+                SortingOrder = entity.SortingOrder
             };
         }
     }

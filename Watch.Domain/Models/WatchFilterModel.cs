@@ -23,5 +23,7 @@
         public decimal? MaxPrice { get; set; }
         public List<bool> OnSale { get; set; } = new List<bool>();
         public List<bool> IsTop { get; set; } = new List<bool>();
+        public string? Sorting { get; set; }
+        public string? SortingOrder { get; set; }
     }
 }

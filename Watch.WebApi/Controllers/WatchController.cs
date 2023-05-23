@@ -66,7 +66,9 @@ namespace Watch.WebApi.Controllers
                                                         [FromQuery] decimal? minPrice = null,
                                                         [FromQuery] decimal? maxPrice = null,
                                                         [FromQuery] List<bool>? onSale = null,
-                                                        [FromQuery] List<bool>? isTop = null)
+                                                        [FromQuery] List<bool>? isTop = null,
+                                                        [FromQuery] string? sorting = null,
+                                                        [FromQuery] string? sortingOrder = null)
         {
             var filters = new WatchFilter
             {
@@ -90,7 +92,9 @@ namespace Watch.WebApi.Controllers
                 StrapTypeId = strapTypeIds ?? new List<int?>(),
                 StyleId = styleIds ?? new List<int?>(),
                 FunctionId = functionIds ?? new List<int?>(),
-                WaterResistanceId = waterResistanceIds ?? new List<int?>()
+                WaterResistanceId = waterResistanceIds ?? new List<int?>(),
+                Sorting = sorting,
+                SortingOrder = sortingOrder
             };
 
             var watches = await _context.Watches.GetAsync(page, perPage, filters);

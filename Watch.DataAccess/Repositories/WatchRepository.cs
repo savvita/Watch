@@ -75,17 +75,11 @@ namespace Watch.DataAccess.Repositories
                 }
             }
 
-            var promotion = await _db.Promotions.LastOrDefaultAsync(x => x.IsActive);
+            var promotion = await _db.Promotions.FirstOrDefaultAsync(x => x.IsActive && (x.BrandId == null || x.BrandId == entity.BrandId));
+
             if(promotion != null)
             {
-                if(promotion.BrandId == null)
-                {
-                    entity.Discount = promotion.DiscountValue;
-                }
-                else if(promotion.BrandId == entity.BrandId)
-                {
-                    entity.Discount = promotion.DiscountValue;
-                }
+                entity.Discount = promotion.DiscountValue;
             }
 
             entity = (await _db.Watches.AddAsync(entity)).Entity;
@@ -254,12 +248,36 @@ namespace Watch.DataAccess.Repositories
                     watches = watches.Include(w => w.Functions);
                     watches = watches.AsEnumerable().Where(watch => filters.FunctionId.All(filter => watch.Functions.FirstOrDefault(f => f.Id == filter) != null)).AsQueryable();
                 }
+
+                if (filters.Sorting != null)
+                {
+                    switch(filters.Sorting.ToLower())
+                    {
+                        case "price":
+                            watches = filters.SortingOrder != null && filters.SortingOrder.ToLower() == "asc" ? watches.OrderBy(x => x.Price * (1 - (x.Discount ?? 0) / 100)) : watches.OrderByDescending(x => x.Price * (1 - (x.Discount ?? 0) / 100));
+                            break;
+                        case "date":
+                            watches = filters.SortingOrder != null && filters.SortingOrder.ToLower() == "asc" ? watches.OrderBy(x => x.Id) : watches.OrderByDescending(x => x.Id);
+                            break;
+                        case "title":
+                            watches = filters.SortingOrder != null && filters.SortingOrder.ToLower() == "asc" ? watches.OrderBy(x => x.Title) : watches.OrderByDescending(x => x.Title);
+                            break;
+                        case "model":
+                            watches = filters.SortingOrder != null && filters.SortingOrder.ToLower() == "asc" ? watches.OrderBy(x => x.Model) : watches.OrderByDescending(x => x.Model);
+                            break;
+                    }
+                }
+                else
+                {
+                    watches = watches.OrderByDescending(x => x.Id);
+                }
             }
 
             var result = new ResultModel<List<WatchModel>>()
             {
                 Hits = watches.Count()
             };
+
 
             watches = watches
                 .Skip((page - 1) * perPage)

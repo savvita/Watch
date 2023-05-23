@@ -17,6 +17,9 @@ namespace Watch.Domain.Models
         [MaxLength(200)]
         public string Model { get; set; } = null!;
 
+        public double Rate { get; set; } = 0;
+        public int Votes { get; set; } = 0;
+
         public int? BrandId { get; set; }
         public int? CollectionId{ get; set; }
         public int? StyleId { get; set; }

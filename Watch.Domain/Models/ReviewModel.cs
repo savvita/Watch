@@ -9,6 +9,8 @@ namespace Watch.Domain.Models
         public byte[] RowVersion { get; set; } = null!;
         public DateTime Date { get; set; }
 
+        public byte? Rate { get; set; }
+
         [Required]
         public string UserId { get; set; } = null!;
 

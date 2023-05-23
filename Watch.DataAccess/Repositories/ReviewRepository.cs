@@ -10,6 +10,52 @@ namespace Watch.DataAccess.Repositories
         {
         }
 
+        public new async Task<ReviewModel?> CreateAsync(ReviewModel entity)
+        {
+            if(entity.Rate != null && (entity.Rate < 0 || entity.Rate > 5))
+            {
+                return null;
+            }
+
+            using (var transaction = _db.Database.BeginTransaction())
+            {
+                try
+                {
+                    entity = (await _db.Reviews.AddAsync(entity)).Entity;
+                    await _db.SaveChangesAsync();
+
+                    if (entity.Rate != null)
+                    {
+                        await UpdateRate(entity);
+                        await _db.SaveChangesAsync();
+                    }
+
+                    transaction.Commit();
+                    return entity;
+                }
+                catch
+                {
+                    transaction.Rollback();
+                    return null;
+                }
+            }
+        }
+
+        private async Task UpdateRate(ReviewModel entity)
+        {
+            var watch = await _db.Watches.FirstAsync(x => x.Id == entity.WatchId);
+            var reviews = _db.Reviews.Where(x => x.WatchId == entity.WatchId && x.Rate != null && x.Deleted == false && x.Checked == true).ToList();
+            //if (entity.Checked == true && entity.Deleted == false && entity.Rate != null)
+            //{
+            //    reviews.Add(entity);
+            //}
+            watch.Votes = reviews.Count();
+            if (watch.Votes > 0)
+            {
+                watch.Rate = (reviews.Sum(x => x.Rate) ?? 0) / (float)reviews.Count();
+            }
+        }
+
         public new async Task<bool> DeleteAsync(int id)
         {
             var model = await _db.Reviews.FirstOrDefaultAsync(x => x.Id == id);
@@ -26,6 +72,7 @@ namespace Watch.DataAccess.Repositories
             {
                 return false;
             }
+            await UpdateRate(model);
 
             await _db.SaveChangesAsync();
 
@@ -80,6 +127,15 @@ namespace Watch.DataAccess.Repositories
         }
         public async Task<ConcurrencyUpdateResultModel> UpdateConcurrencyAsync(ReviewModel entity)
         {
+            if (entity.Rate != null && (entity.Rate < 0 || entity.Rate > 5))
+            {
+                return new ConcurrencyUpdateResultModel()
+                {
+                    Code = 409,
+                    Message = "Validation error"
+                };
+            }
+
             try
             {
                 var model = (await _db.Reviews.FirstAsync(x => x.Id == entity.Id));
@@ -91,6 +147,7 @@ namespace Watch.DataAccess.Repositories
                 model.Deleted = entity.Deleted;
                 model.Date = entity.Date;
                 model.WatchId = entity.WatchId;
+                model.Rate = entity.Rate;
 
                 if (!CheckRowVersion(model.RowVersion, entity.RowVersion))
                 {
@@ -98,6 +155,8 @@ namespace Watch.DataAccess.Repositories
                 }
 
                 _db.Reviews.Update(model);
+                await _db.SaveChangesAsync();
+                await UpdateRate(model);
                 await _db.SaveChangesAsync();
 
                 return new ConcurrencyUpdateResultModel()

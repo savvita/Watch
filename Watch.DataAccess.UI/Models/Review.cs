@@ -8,6 +8,7 @@ namespace Watch.DataAccess.UI.Models
         [Timestamp]
         public byte[]? RowVersion { get; set; } = null!;
         public DateTime Date { get; set; }
+        public byte? Rate { get; set; }
 
         [Required]
         public string UserId { get; set; } = null!;
@@ -40,6 +41,7 @@ namespace Watch.DataAccess.UI.Models
             Deleted = model.Deleted;
             UserName = model.UserName;
             RowVersion = model.RowVersion;
+            Rate = model.Rate;
         }
 
         public static explicit operator ReviewModel(Review entity)
@@ -55,7 +57,8 @@ namespace Watch.DataAccess.UI.Models
                 Checked = entity.Checked,
                 UserName = entity.UserName,
                 Deleted = entity.Deleted,
-                RowVersion = entity.RowVersion
+                RowVersion = entity.RowVersion,
+                Rate = entity.Rate
             };
         }
     }

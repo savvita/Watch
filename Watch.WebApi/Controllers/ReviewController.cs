@@ -113,7 +113,7 @@ namespace Watch.WebApi.Controllers
 
         [HttpPost("{watchId:int}")]
         [Authorize(Roles = UserRoles.User)]
-        public async Task<Result<Review>> Create(int watchId, [FromBody] string text)
+        public async Task<Result<Review>> Create(int watchId, [FromBody] NewReview entity)
         {
             await _context.Users.CheckUserAsync(User.Identity);
 
@@ -131,16 +131,19 @@ namespace Watch.WebApi.Controllers
                 throw new UserNotFoundException(username.Value);
             }
 
-            var entity = new Review
+            var newEntity = new Review()
             {
+                Checked = false,
+                Deleted = false,
                 Date = DateTime.Now,
-                Text = text,
+                Rate = entity.Rate,
+                Text = entity.Text,
                 UserId = user.Id,
                 UserName = username.Value,
                 WatchId = watchId
             };
 
-            var res = await _context.Reviews.CreateAsync(entity);
+            var res = await _context.Reviews.CreateAsync(newEntity);
             return new Result<Review>
             {
                 Value = res,

@@ -38,7 +38,7 @@ namespace Watch.DataAccess.Repositories
                 .Include(w => w.Gender)
                 .Include(w => w.Images)
                 .Include(w => w.Functions)
-                .Include(w => w.Reviews)
+                .Include(w => w.Reviews.OrderByDescending(x => x.Date))
                 .ToList();
 
             return e.ElementAt(0);
@@ -286,6 +286,9 @@ namespace Watch.DataAccess.Repositories
                             break;
                         case "model":
                             watches = filters.SortingOrder != null && filters.SortingOrder.ToLower() == "asc" ? watches.OrderBy(x => x.Model) : watches.OrderByDescending(x => x.Model);
+                            break;
+                        case "rate":
+                            watches = filters.SortingOrder != null && filters.SortingOrder.ToLower() == "asc" ? watches.OrderBy(x => x.Rate) : watches.OrderByDescending(x => x.Rate);
                             break;
                     }
                 }

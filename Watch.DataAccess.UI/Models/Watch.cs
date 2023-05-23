@@ -13,6 +13,8 @@ namespace Watch.DataAccess.UI.Models
         [Required]
         [MaxLength(200)]
         public string Model { get; set; } = null!;
+        public double Rate { get; set; } = 0;
+        public int Votes { get; set; } = 0;
 
         public Brand? Brand { get; set; }
         public Collection? Collection { get; set; }
@@ -62,6 +64,8 @@ namespace Watch.DataAccess.UI.Models
             IsTop = model.IsTop;
             Available = model.Available;
             Description = model.Description;
+            Rate = model.Rate;
+            Votes = model.Votes;
             
             if(model.Brand != null)
             {
@@ -175,7 +179,10 @@ namespace Watch.DataAccess.UI.Models
                 IncrustationTypeId = entity.IncrustationType?.Id,
                 DialTypeId = entity.DialType?.Id,
                 GenderId = entity.Gender?.Id,
-                RowVersion = entity.RowVersion
+                RowVersion = entity.RowVersion,
+                Rate = entity.Rate,
+                Votes = entity.Votes
+
             };
 
             entity.Functions.ForEach(f => model.Functions.Add((FunctionModel)f));

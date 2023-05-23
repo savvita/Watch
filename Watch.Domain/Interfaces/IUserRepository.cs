@@ -7,5 +7,6 @@ namespace Watch.Domain.Interfaces
         Task<UserModel?> GetByUserNameAsync(string username);
         Task<UserModel?> GetAsync(string id);
         Task<bool> SetActivityAsync(string id, bool activity);
+        Task<ConcurrencyUpdateResultModel> UpdateConcurrencyAsync(UserModel entity);
     }
 }

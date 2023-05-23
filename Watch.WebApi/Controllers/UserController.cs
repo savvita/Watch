@@ -165,39 +165,5 @@ namespace Watch.WebApi.Controllers
             };
         }
 
-        //private async Task<string> GetTokenAsync()
-        //{
-        //    var username = User.FindFirst(c => c.Type == ClaimTypes.Name);
-
-        //    if (username == null)
-        //    {
-        //        throw new InternalServerException();
-        //    }
-
-        //    var user = await _context.Users.GetByUserNameAsync(username.Value);
-
-        //    if (user == null)
-        //    {
-        //        throw new UserNotFoundException(username.Value);
-        //    }
-
-        //    if (user.UserName == null)
-        //    {
-        //        throw new InternalServerException();
-        //    }
-
-        //    var roles = (await _context.Users.GetRolesAsync((UserModel)user)).ToList();
-
-        //    var claims = new List<Claim>
-        //        {
-        //            new Claim(ClaimTypes.Name, user.UserName),
-        //            new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-        //            new Claim("IsActive", user.IsActive.ToString())
-        //        };
-
-        //    roles.ForEach(role => claims.Add(new Claim(ClaimTypes.Role, role)));
-
-        //    return new JwtSecurityTokenHandler().WriteToken(JwtHelper.GetToken(claims, _configuration));
-        //}
     }
 }

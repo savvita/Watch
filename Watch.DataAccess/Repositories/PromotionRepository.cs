@@ -92,10 +92,7 @@ namespace Watch.DataAccess.Repositories
                 try
                 {
                     var model = (await _db.Promotions.FirstAsync(x => x.Id == entity.Id));
-                    if(!CheckRowVersion(model.RowVersion, entity.RowVersion))
-                    {
-                        throw new DbUpdateConcurrencyException();
-                    }
+ 
 
                     if(entity.IsActive && model.BrandId != null && model.BrandId != entity.BrandId)
                     {
@@ -134,6 +131,11 @@ namespace Watch.DataAccess.Repositories
                     else if(model.BrandId != null)
                     {
                         model.BrandId = null;
+                    }
+
+                    if (!CheckRowVersion(model.RowVersion, entity.RowVersion))
+                    {
+                        throw new DbUpdateConcurrencyException();
                     }
 
                     _db.Promotions.Update(model);

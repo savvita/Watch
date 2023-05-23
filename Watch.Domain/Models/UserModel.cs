@@ -5,6 +5,9 @@ namespace Watch.Domain.Models
 {
     public class UserModel : IdentityUser
     {
+        [Timestamp]
+        [ConcurrencyCheck]
+        public byte[] RowVersion { get; set; } = null!;
         [MaxLength(100)]
         public string? FirstName { get; set; }
 

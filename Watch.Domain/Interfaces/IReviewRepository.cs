@@ -6,5 +6,6 @@ namespace Watch.Domain.Interfaces
     {
         Task<List<ReviewModel>> GetByWatchIdAsync(int watchId);
         Task<List<ReviewModel>> GetByUserIdAsync(string userId);
+        Task<ConcurrencyUpdateResultModel> UpdateConcurrencyAsync(ReviewModel entity);
     }
 }

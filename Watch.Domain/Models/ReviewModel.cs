@@ -5,6 +5,8 @@ namespace Watch.Domain.Models
     public class ReviewModel
     {
         public int Id { get; set; }
+        [Timestamp]
+        public byte[] RowVersion { get; set; } = null!;
         public DateTime Date { get; set; }
 
         [Required]

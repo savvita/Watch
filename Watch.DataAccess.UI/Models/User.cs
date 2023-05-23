@@ -5,6 +5,8 @@ namespace Watch.DataAccess.UI.Models
     public class User
     {
         public string Id { get; set; } = null!;
+        [Timestamp]
+        public byte[]? RowVersion { get; set; } = null!;
 
         [MaxLength(100)]
         public string? FirstName { get; set; }
@@ -40,6 +42,7 @@ namespace Watch.DataAccess.UI.Models
             Email = model.Email;
             IsActive = model.IsActive;
             PhoneNumber = model.PhoneNumber;
+            RowVersion = model.RowVersion;
         }
 
         public static explicit operator UserModel(User entity)
@@ -53,7 +56,8 @@ namespace Watch.DataAccess.UI.Models
                 LastName = entity.LastName,
                 IsActive = entity.IsActive,
                 Email = entity.Email,
-                PhoneNumber = entity.PhoneNumber
+                PhoneNumber = entity.PhoneNumber,
+                RowVersion = entity.RowVersion
             };
         }
     }

@@ -108,6 +108,23 @@ namespace Watch.DataAccess.Repositories
             return await _db.Slides.Include(x => x.Texts).Include(x => x.Promotion).FirstOrDefaultAsync();
         }
 
+        private bool CheckRowVersion(byte[] db, byte[] updated)
+        {
+            if (db.Length != updated.Length)
+            {
+                return false;
+            }
+            int length = db.Length;
+            for (int i = 0; i < length; i++)
+            {
+                if (db[i] != updated[i])
+                {
+                    return false;
+                }
+            }
+            return true;
+        }
+
         public async Task<ConcurrencyUpdateResultModel> UpdateConcurrencyAsync(SlideModel entity)
         {
             using (var transaction = _db.Database.BeginTransaction())
@@ -136,6 +153,11 @@ namespace Watch.DataAccess.Repositories
                         await HandleIndexes(model);
                     }
 
+                    if(!CheckRowVersion(model.RowVersion, entity.RowVersion))
+                    {
+                        throw new DbUpdateConcurrencyException();
+                    }
+
                     _db.Slides.Update(model);
                     await _db.SaveChangesAsync();
                     transaction.Commit();
@@ -149,7 +171,7 @@ namespace Watch.DataAccess.Repositories
                 catch(DbUpdateConcurrencyException)
                 {
                     transaction.Rollback();
-                    var model = await _db.Promotions.FindAsync(entity.Id);
+                    var model = await _db.Slides.FindAsync(entity.Id);
 
                     if (model == null)
                     {

@@ -22,7 +22,10 @@ namespace Watch.DataAccess.Repositories
             model.Deleted = true;
             model.Checked = true;
 
-            _db.Update(model);
+            if((await UpdateConcurrencyAsync(model)).Code != 200)
+            {
+                return false;
+            }
 
             await _db.SaveChangesAsync();
 
@@ -58,5 +61,71 @@ namespace Watch.DataAccess.Repositories
 
             return models;
         }
+
+        private bool CheckRowVersion(byte[] db, byte[] updated)
+        {
+            if (db.Length != updated.Length)
+            {
+                return false;
+            }
+            int length = db.Length;
+            for (int i = 0; i < length; i++)
+            {
+                if (db[i] != updated[i])
+                {
+                    return false;
+                }
+            }
+            return true;
+        }
+        public async Task<ConcurrencyUpdateResultModel> UpdateConcurrencyAsync(ReviewModel entity)
+        {
+            try
+            {
+                var model = (await _db.Reviews.FirstAsync(x => x.Id == entity.Id));
+                model.UserId = entity.UserId;
+                model.UserName = entity.UserName;
+                model.ReplyToId = entity.ReplyToId;
+                model.Text = entity.Text;
+                model.Checked = entity.Checked;
+                model.Deleted = entity.Deleted;
+                model.Date = entity.Date;
+                model.WatchId = entity.WatchId;
+
+                if (!CheckRowVersion(model.RowVersion, entity.RowVersion))
+                {
+                    throw new DbUpdateConcurrencyException();
+                }
+
+                _db.Reviews.Update(model);
+                await _db.SaveChangesAsync();
+
+                return new ConcurrencyUpdateResultModel()
+                {
+                    Code = 200,
+                    Message = "Ok"
+                };
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                var model = await _db.Watches.FindAsync(entity.Id);
+
+                if (model == null)
+                {
+                    return new ConcurrencyUpdateResultModel()
+                    {
+                        Code = 404,
+                        Message = "The entry was deleted"
+                    };
+                }
+
+                return new ConcurrencyUpdateResultModel()
+                {
+                    Code = 409,
+                    Message = "The entry was modified by another user"
+                };
+            }
+        }
+
     }
 }

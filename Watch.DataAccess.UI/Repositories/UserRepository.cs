@@ -238,17 +238,9 @@ namespace Watch.DataAccess.UI.Repositories
                 throw new ConflictException();
             }
 
-            model.UserName = entity.UserName;
-            model.Email = entity.Email;
-            model.FirstName = entity.FirstName;
-            model.SecondName = entity.SecondName;
-            model.LastName = entity.LastName;
-            model.IsActive = entity.IsActive;
-            model.PhoneNumber = entity.PhoneNumber;
+            var res = await _db.Users.UpdateConcurrencyAsync((UserModel)entity);
 
-            var res = await _db.Users.UpdateAsync(model);
-
-            return new User(res);
+            return entity;
         }
 
         public async Task<IEnumerable<string>> GetRolesAsync(UserModel entity)

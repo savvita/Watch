@@ -1,4 +1,5 @@
-﻿using Watch.DataAccess.UI.Interfaces;
+﻿using Watch.DataAccess.UI.Exceptions;
+using Watch.DataAccess.UI.Interfaces;
 
 namespace Watch.DataAccess.UI.Repositories
 {
@@ -48,9 +49,13 @@ namespace Watch.DataAccess.UI.Repositories
         public async Task<Review> UpdateAsync(Review entity)
         {
             entity.Text = entity.Text.Trim();
-            var model = await _db.Reviews.UpdateAsync((ReviewModel)entity);
+            var res = await _db.Reviews.UpdateConcurrencyAsync((ReviewModel)entity);
+            //if(res.Code != 200)
+            //{
+            //    throw new ConcurrencyUpdateException();
+            //}
 
-            return new Review(model);
+            return entity;
         }
     }
 }

@@ -1,11 +1,12 @@
-﻿using Newtonsoft.Json.Linq;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace Watch.DataAccess.UI.Models
 {
     public class Review
     {
         public int Id { get; set; }
+        [Timestamp]
+        public byte[]? RowVersion { get; set; } = null!;
         public DateTime Date { get; set; }
 
         [Required]
@@ -38,6 +39,7 @@ namespace Watch.DataAccess.UI.Models
             Checked = model.Checked;
             Deleted = model.Deleted;
             UserName = model.UserName;
+            RowVersion = model.RowVersion;
         }
 
         public static explicit operator ReviewModel(Review entity)
@@ -52,7 +54,8 @@ namespace Watch.DataAccess.UI.Models
                 ReplyToId = entity.ReplyToId,
                 Checked = entity.Checked,
                 UserName = entity.UserName,
-                Deleted = entity.Deleted
+                Deleted = entity.Deleted,
+                RowVersion = entity.RowVersion
             };
         }
     }

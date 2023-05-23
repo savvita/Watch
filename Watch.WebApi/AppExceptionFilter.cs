@@ -111,6 +111,16 @@ namespace Watch.WebApi
                         StatusCode = (int)HttpStatusCode.NotFound
                     };
                 }
+                else if (context.Exception is ConcurrencyUpdateException)
+                {
+                    context.Result = new ObjectResult(new
+                    {
+                        code = "concurrency-update-exception"
+                    })
+                    {
+                        StatusCode = (int)HttpStatusCode.Conflict
+                    };
+                }
                 else
                 {
                     context.Result = new ObjectResult(new

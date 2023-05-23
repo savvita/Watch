@@ -17,7 +17,6 @@ namespace Watch.DataAccess.UI.Repositories
 
         }
 
-        //TODO delete texts?
         public async Task<bool> DeleteAsync(int id)
         {
             var model = await _db.Slides.GetAsync(id);
@@ -28,9 +27,9 @@ namespace Watch.DataAccess.UI.Repositories
 
             model.IsActive = false;
 
-            await _db.Slides.UpdateAsync(model);
+            var res = await _db.Slides.UpdateConcurrencyAsync(model);
 
-            return true;
+            return res.Code == 200;
         }
 
         public async Task<IEnumerable<Slide>> GetAsync()

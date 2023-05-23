@@ -87,6 +87,23 @@ namespace Watch.DataAccess.Repositories
             return entity;
         }
 
+        private bool CheckRowVersion(byte[] db, byte[] updated)
+        {
+            if (db.Length != updated.Length)
+            {
+                return false;
+            }
+            int length = db.Length;
+            for (int i = 0; i < length; i++)
+            {
+                if (db[i] != updated[i])
+                {
+                    return false;
+                }
+            }
+            return true;
+        }
+
         public async Task<ConcurrencyUpdateResultModel> UpdateConcurrencyAsync(WatchModel entity)
         {
             if (entity.Available < 0 || entity.Price < 0 || entity.Discount < 0 || entity.Discount > 100)
@@ -179,6 +196,11 @@ namespace Watch.DataAccess.Repositories
                     {
                         model.Discount = promotion.DiscountValue;
                     }
+                }
+
+                if(!CheckRowVersion(model.RowVersion, entity.RowVersion))
+                {
+                    throw new DbUpdateConcurrencyException();
                 }
 
                 _db.Watches.Update(model);

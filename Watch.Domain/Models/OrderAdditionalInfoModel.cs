@@ -16,5 +16,7 @@ namespace Watch.Domain.Models
         public int DeliveryId { get; set; }
         public string? SettlementRef { get; set; }
         public string? WarehouseRef { get; set; }
+        [MaxLength(500)]
+        public string? Comments { get; set; }
     }
 }

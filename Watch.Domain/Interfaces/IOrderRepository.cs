@@ -12,5 +12,6 @@ namespace Watch.Domain.Interfaces
         Task<bool> CancelOrderAsync(int id);
         Task<bool> CloseOrderAsync(int id);
         Task<bool> AcceptOrderAsync(int orderId, string managerId);
+        Task<ConcurrencyUpdateResultModel> UpdateConcurrencyAsync(OrderModel entity);
     }
 }

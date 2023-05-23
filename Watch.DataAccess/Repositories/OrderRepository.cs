@@ -59,8 +59,15 @@ namespace Watch.DataAccess.Repositories
             }
 
             order.StatusId = statusId;
-            _db.Orders.Update(order);
-            await _db.SaveChangesAsync();
+            try
+            {
+                _db.Orders.Update(order);
+                await _db.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                return false;
+            }
             return true;
         }
 
@@ -74,38 +81,49 @@ namespace Watch.DataAccess.Repositories
 
             order.EN = en;
             order.StatusId = 7;
-            _db.Orders.Update(order);
-            await _db.SaveChangesAsync();
+            try
+            {
+                _db.Orders.Update(order);
+                await _db.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                return false;
+            }
             return true;
         }
 
         public async Task<bool> CancelOrderAsync(int id)
         {
-            var res = await SetOrderStatusAsync(id, 4);
-            if(res == false)
+            using (var transaction = _db.Database.BeginTransaction())
             {
-                return false;
-            }
-
-            var order = await _db.Orders.FirstOrDefaultAsync(o => o.Id == id);
-
-            if(order == null)
-            {
-                return false;
-            }
-
-            foreach(var detail in order.Details)
-            {
-                var watch = await _db.Watches.FirstOrDefaultAsync(w => w.Id == detail.WatchId);
-
-                if(watch != null)
+                try
                 {
-                    watch.Available += detail.Count;
+                    var res = await SetOrderStatusAsync(id, 4);
+                    if (res == false)
+                    {
+                        throw new Exception();
+                    }
+
+                    var order = await _db.Orders.FirstAsync(o => o.Id == id);
+
+                    foreach (var detail in order.Details)
+                    {
+                        var watch = await _db.Watches.FirstAsync(w => w.Id == detail.WatchId);
+
+                        watch.Available += detail.Count;
+                    }
+
+                    await _db.SaveChangesAsync();
+                    transaction.Commit();
+                    return true;
+                }
+                catch
+                {
+                    transaction.Rollback();
+                    return false;
                 }
             }
-
-            await _db.SaveChangesAsync();
-            return true;
         }
 
         public async Task<bool> CloseOrderAsync(int id)
@@ -117,8 +135,15 @@ namespace Watch.DataAccess.Repositories
             }
 
             order.StatusId = 3;
-            _db.Orders.Update(order);
-            await _db.SaveChangesAsync();
+            try
+            {
+                _db.Orders.Update(order);
+                await _db.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                return false;
+            }
             return true;
         }
 
@@ -137,9 +162,63 @@ namespace Watch.DataAccess.Repositories
 
             order.StatusId = 2;
             order.ManagerId = managerId;
-            _db.Orders.Update(order);
-            await _db.SaveChangesAsync();
+
+            try
+            {
+                _db.Orders.Update(order);
+                await _db.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                return false;
+            }
             return true;
+        }
+
+        public async Task<ConcurrencyUpdateResultModel> UpdateConcurrencyAsync(OrderModel entity)
+        {
+            try
+            {
+                var model = (await _db.Orders.FirstAsync(x => x.Id == entity.Id));
+                model.ManagerId = entity.ManagerId;
+                model.PaymentId = entity.PaymentId;
+                model.DeliveryId = entity.DeliveryId;
+                model.CityId = entity.CityId;
+                model.WarehouseId = entity.WarehouseId;
+                model.Comments = entity.Comments?.Trim();
+                model.StatusId = entity.StatusId;
+                model.PhoneNumber = entity.PhoneNumber;
+                model.FullName = entity.FullName.Trim();
+                model.EN = entity.EN?.Trim();
+
+                _db.Orders.Update(model);
+                await _db.SaveChangesAsync();
+
+                return new ConcurrencyUpdateResultModel()
+                {
+                    Code = 200,
+                    Message = "Ok"
+                };
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                var model = await _db.Orders.FindAsync(entity.Id);
+
+                if (model == null)
+                {
+                    return new ConcurrencyUpdateResultModel()
+                    {
+                        Code = 404,
+                        Message = "The entry was deleted"
+                    };
+                }
+
+                return new ConcurrencyUpdateResultModel()
+                {
+                    Code = 409,
+                    Message = "The entry was modified by another user"
+                };
+            }
         }
 
         public async Task<List<OrderModel?>> GetAsync(OrderFilterModel filters)

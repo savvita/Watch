@@ -109,6 +109,18 @@ namespace Watch.DataAccess.UnitOfWorks
             {
                 try
                 {
+                    var delivery = await Deliveries.GetAsync(info.DeliveryId);
+                    if(delivery == null || !delivery.IsActive)
+                    {
+                        throw new Exception();
+                    }
+
+                    var payment = await Payments.GetAsync(info.PaymentId);
+                    if (payment == null || !payment.IsActive)
+                    {
+                        throw new Exception();
+                    }
+
                     var order = await Orders.CreateAsync(new OrderModel()
                     {
                         Date = DateTime.Now,
@@ -119,7 +131,8 @@ namespace Watch.DataAccess.UnitOfWorks
                         FullName = info.FullName,
                         PhoneNumber = info.PhoneNumber,
                         CityId = info.SettlementRef,
-                        WarehouseId = info.WarehouseRef
+                        WarehouseId = info.WarehouseRef,
+                        Comments = info.Comments
                     });
 
                     if (order == null)
@@ -143,7 +156,7 @@ namespace Watch.DataAccess.UnitOfWorks
 
                     return order;
                 }
-                catch (Exception)
+                catch
                 {
                     transaction.Rollback();
                     return null;
@@ -191,32 +204,39 @@ namespace Watch.DataAccess.UnitOfWorks
 
         public async Task<bool> CancelOrderAsync(int orderId)
         {
-            var order = _db.Orders.FirstOrDefault(o => o.Id == orderId);
-            if(order == null || order.StatusId == 3 || order.StatusId == 4)
+            using (var transaction = _db.Database.BeginTransaction())
             {
-                return false;
-            }
-
-            foreach(var detail in order.Details)
-            {
-                var watch = _db.Watches.FirstOrDefault(w => w.Id == detail.WatchId);
-                if(watch == null)
+                try
                 {
-                    continue;
+                    var order = _db.Orders.First(o => o.Id == orderId);
+                    if (order.StatusId == 3 || order.StatusId == 4)
+                    {
+                        throw new Exception();
+                    }
+
+                    foreach (var detail in order.Details)
+                    {
+                        var watch = _db.Watches.First(w => w.Id == detail.WatchId);
+
+                        watch.Available += detail.Count;
+                    }
+
+                    if(await Orders.SetOrderStatusAsync(orderId, 4) == false)
+                    {
+                        throw new Exception();
+                    }
+
+                    await _db.SaveChangesAsync();
+                    transaction.Commit();
+                    return true;
+                }
+                catch (Exception)
+                {
+                    transaction.Rollback();
+                    return false;
                 }
 
-                watch.Available += detail.Count;
             }
-
-            await Orders.SetOrderStatusAsync(orderId, 4);
-
-            //TODO Remove comments
-
-            //order.StatusId = 4;
-
-            await _db.SaveChangesAsync();
-
-            return true;
         }
     }
 }

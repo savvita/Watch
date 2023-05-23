@@ -5,6 +5,8 @@ namespace Watch.DataAccess.UI.Models
     public class Order
     {
         public int Id { get; set; }
+        [Timestamp]
+        public byte[]? RowVersion { get; set; }
 
         public string UserId { get; set; } = null!;
         [Required]
@@ -26,6 +28,9 @@ namespace Watch.DataAccess.UI.Models
         [MaxLength(36)]
         public string? EN { get; set; }
 
+        [MaxLength(500)]
+        public string? Comments { get; set; }
+
         public List<OrderDetail> Details { get; set; } = new List<OrderDetail>();
 
         public Order()
@@ -40,6 +45,8 @@ namespace Watch.DataAccess.UI.Models
             EN = model.EN;
             FullName = model.FullName;
             PhoneNumber = model.PhoneNumber;
+            Comments = model.Comments;
+            RowVersion = model.RowVersion;
 
             if (model.Status != null)
             {
@@ -89,7 +96,9 @@ namespace Watch.DataAccess.UI.Models
                 PhoneNumber = entity.PhoneNumber,
                 CityId = entity.City != null ? entity.City.Ref : null,
                 WarehouseId = entity.Warehouse != null ? entity.Warehouse.Ref : null,
-                EN = entity.EN
+                EN = entity.EN,
+                Comments = entity.Comments,
+                RowVersion = entity.RowVersion
             };
 
             entity.Details.ForEach(detail => model.Details.Add((OrderDetailModel)detail));

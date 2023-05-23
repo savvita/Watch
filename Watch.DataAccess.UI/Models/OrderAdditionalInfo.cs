@@ -16,6 +16,8 @@ namespace Watch.DataAccess.UI.Models
         public int DeliveryId { get; set; }
         public string? SettlementRef { get; set; }
         public string? WarehouseRef { get; set; }
+        [MaxLength(500)]
+        public string? Comments { get; set; }
 
         public static explicit operator OrderAdditionalInfoModel(OrderAdditionalInfo entity)
         {
@@ -26,7 +28,8 @@ namespace Watch.DataAccess.UI.Models
                 PaymentId = entity.PaymentId,
                 DeliveryId = entity.DeliveryId,
                 SettlementRef = entity.SettlementRef,
-                WarehouseRef = entity.WarehouseRef
+                WarehouseRef = entity.WarehouseRef,
+                Comments = entity.Comments
             };
         }
     }

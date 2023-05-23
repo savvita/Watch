@@ -6,6 +6,8 @@ namespace Watch.Domain.Models
     public class OrderModel
     {
         public int Id { get; set; }
+        [Timestamp]
+        public byte[] RowVersion { get; set; } = null!;
         public DateTime Date { get; set; }
         public string UserId { get; set; } = null!;
         public int StatusId { get; set; }
@@ -23,6 +25,8 @@ namespace Watch.Domain.Models
         public int DeliveryId { get; set; }
         public string? CityId { get; set; }
         public string? WarehouseId { get; set; }
+        [MaxLength(500)]
+        public string? Comments { get; set; }
         [MaxLength(36)]
         public string? EN { get; set; }
         public virtual OrderStatusModel? Status { get; set; }

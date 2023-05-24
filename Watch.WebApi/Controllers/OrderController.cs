@@ -9,6 +9,7 @@ using Watch.DataAccess.UI.Models;
 using Watch.Domain.Models;
 using Watch.Domain.Roles;
 using Watch.WebApi.Helpers;
+using Watch.WebApi.Notification;
 
 namespace Watch.WebApi.Controllers
 {
@@ -17,11 +18,21 @@ namespace Watch.WebApi.Controllers
     public class OrderController : ControllerBase
     {
         private readonly DbContext _context;
+        private readonly UserManager<UserModel> _userManager;
         private readonly IConfiguration _configuration;
-        public OrderController(WatchDbContext context, IConfiguration configuration, UserManager<UserModel> userManager, RoleManager<IdentityRole> roleManager)
+        private readonly INotification _notification;
+        public OrderController(
+            WatchDbContext context,
+            IConfiguration configuration, 
+            UserManager<UserModel> userManager, 
+            RoleManager<IdentityRole> roleManager, 
+            INotification notification
+        )
         {
             _context = new DbContext(context, userManager, roleManager);
             _configuration = configuration;
+            _notification = notification;
+            _userManager = userManager;
         }
 
         [HttpGet("")]
@@ -226,6 +237,11 @@ namespace Watch.WebApi.Controllers
             }
 
             var res = await _context.Orders.CreateAsync(basket, info);
+            if(res != null)
+            {
+                var u = await _userManager.FindByNameAsync(username.Value);
+                await _notification.SendOrderNotificationAsync(u, (OrderModel)res);
+            }
             return new Result<Order>
             {
                 Value = res,

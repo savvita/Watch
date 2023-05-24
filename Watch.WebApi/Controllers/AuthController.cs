@@ -2,19 +2,16 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using System.IdentityModel.Tokens.Jwt;
-using System.Net;
 using System.Security.Claims;
-using System.Text;
-using System.Web;
 using Watch.DataAccess;
 using Watch.DataAccess.UI;
 using Watch.DataAccess.UI.Exceptions;
 using Watch.DataAccess.UI.Models;
 using Watch.Domain.Models;
 using Watch.Domain.Roles;
-using Watch.Email;
 using Watch.WebApi.Helpers;
 using Watch.WebApi.Message;
+using Watch.WebApi.Notification;
 
 namespace Watch.WebApi.Controllers
 {
@@ -26,13 +23,21 @@ namespace Watch.WebApi.Controllers
         private readonly IConfiguration _configuration;
         private readonly UserManager<UserModel> _userManager;
         private readonly IVerification _verification;
+        private readonly INotification _notification;
 
-        public AuthController(WatchDbContext context, IConfiguration configuration, UserManager<UserModel> userManager, RoleManager<IdentityRole> roleManager, IVerification verification)
+        public AuthController(WatchDbContext context, 
+            IConfiguration configuration, 
+            UserManager<UserModel> userManager, 
+            RoleManager<IdentityRole> roleManager, 
+            IVerification verification,
+            INotification notification
+        )
         {
             _context = new DbContext(context, userManager, roleManager);
             _configuration = configuration;
             _userManager = userManager;
             _verification = verification;
+            _notification = notification;
         }
 
         [HttpPost("")]
@@ -79,6 +84,7 @@ namespace Watch.WebApi.Controllers
             {
                 var u = await _userManager.FindByIdAsync(user.Id);
                 await _verification.SendConfirmationEmailAsync(this, _configuration, u);
+                await _notification.SendRegistrationNotificationAsync(u);
             }
 
             var claims = new List<Claim>
@@ -179,6 +185,7 @@ namespace Watch.WebApi.Controllers
                             await _userManager.ChangePasswordAsync(user, model.OldPassword, model.NewPassword);
                         if (result.Succeeded)
                         {
+                            await _notification.SendChangePaswordNotificationAsync(user, DateTime.Now);
                             return new Result<bool>
                             {
                                 Value = true,
@@ -221,6 +228,7 @@ namespace Watch.WebApi.Controllers
             var result = await _userManager.ResetPasswordAsync(user, model.Code, model.Password);
             if (result.Succeeded)
             {
+                await _notification.SendResetPaswordNotificationAsync(user, DateTime.Now);
                 return Results.Ok();
             }
             else
@@ -240,6 +248,7 @@ namespace Watch.WebApi.Controllers
             {
                 var u = await _userManager.FindByIdAsync(user.Id);
                 await _verification.SendConfirmationEmailAsync(this, _configuration, u);
+                await _notification.SendRegistrationNotificationAsync(u);
             }
 
             var claims = new List<Claim>
@@ -270,6 +279,7 @@ namespace Watch.WebApi.Controllers
             {
                 var u = await _userManager.FindByIdAsync(user.Id);
                 await _verification.SendConfirmationEmailAsync(this, _configuration, u);
+                await _notification.SendRegistrationNotificationAsync(u);
             }
 
             var claims = new List<Claim>

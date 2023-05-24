@@ -8,6 +8,7 @@ using Watch.Domain.Models;
 using Watch.Files;
 using Watch.WebApi;
 using Watch.WebApi.Message;
+using Watch.WebApi.Notification;
 using ConfigurationManager = Watch.WebApi.ConfigurationManager;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -41,6 +42,7 @@ builder.Services.AddScoped<IFileController>(options =>
 });
 
 builder.Services.AddScoped<IVerification, EmailVerification>();
+builder.Services.AddScoped<INotification, EmailNotification>();
 
 
 //TODO change password requirements

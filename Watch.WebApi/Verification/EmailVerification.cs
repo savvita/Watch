@@ -59,6 +59,43 @@ namespace Watch.WebApi.Message
             await client.SendEmail(from, user.Email, subject, sb.ToString());
         }
 
+        public async Task SendResetPasswordEmailAsync(ControllerBase controller, IConfiguration configuration, UserManager<UserModel> userManager, string userName)
+        { 
+
+            var user = await userManager.FindByNameAsync(userName);
+            if (user == null || !(await userManager.IsEmailConfirmedAsync(user)))
+            {
+                return;
+            }
+
+            var host = configuration["Email:Host"];
+            var portStr = configuration["Email:Port"];
+            var from = configuration["Email:From"];
+
+            if (host == null || portStr == null || from == null)
+            {
+                return;
+            }
+
+            var port = int.Parse(portStr);
+
+            EmailClient client = new EmailClient(host, port);
+
+            var code = await userManager.GeneratePasswordResetTokenAsync(user);
+            var codeHtmlVersion = HttpUtility.UrlEncode(code);
+
+            var callbackUrl = controller.Url.Action("ResetPassword", "Auth", new { userId = user.Id, code = codeHtmlVersion }, protocol: controller.HttpContext.Request.Scheme);
+
+            string subject = "Скидання паролю на WatchShopMarket";
+
+            StringBuilder sb = new StringBuilder();
+            sb.Append("<h1>WatchShopMarket</h1>");
+            sb.Append("Для скидання паролю перейдіть за посиланням ");
+            sb.Append($"<a href='{callbackUrl}'>Скинути</a>");
+
+            await client.SendEmail(from, user.Email, subject, sb.ToString());
+        }
+
         public bool CheckEmailConfirmation(UserModel user, string type, string token)
         {
             token = HttpUtility.UrlDecode(token);

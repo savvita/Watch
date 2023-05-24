@@ -144,12 +144,103 @@ namespace Watch.WebApi.Controllers
             }
         }
 
+        [HttpPost("reset")]
+        public async Task<IResult> ResetPassword([FromBody]ForgotPassword model)
+        {
+            var user = await _userManager.FindByNameAsync(model.UserName);
+
+            if (user != null)
+            {
+                await _verification.SendResetPasswordEmailAsync(this, _configuration, _userManager, model.UserName);
+            }
+
+            return Results.Ok();
+        }
+
+        [HttpGet("reset")]
+        public RedirectResult ResetPassword(string userId, string code)
+        {
+            return RedirectPermanent(_configuration["Domain"] + $"reset/{userId}/{code}");
+        }
+
+        [HttpPost("changepassword")]
+        [Authorize]
+        public async Task<Result<bool>> ChangePassword([FromBody] ChangePassword model)
+        {
+            if (ModelState.IsValid)
+            {
+                if (User.Identity != null)
+                {
+                    var username = User.Identity.Name;
+                    var user = await _userManager.FindByNameAsync(username);
+                    if (user != null)
+                    {
+                        IdentityResult result =
+                            await _userManager.ChangePasswordAsync(user, model.OldPassword, model.NewPassword);
+                        if (result.Succeeded)
+                        {
+                            return new Result<bool>
+                            {
+                                Value = true,
+                                Hits = 1,
+                                Token = await JwtHelper.GetTokenAsync(_context, User, _configuration)
+                            };
+                        }
+                        else
+                        {
+                            return new Result<bool>
+                            {
+                                Value = false,
+                                Hits = 0,
+                                Token = await JwtHelper.GetTokenAsync(_context, User, _configuration)
+                            };
+                        }
+                    }
+                }
+            }
+
+            return new Result<bool>
+            {
+                Value = false,
+                Hits = 0,
+                Token = await JwtHelper.GetTokenAsync(_context, User, _configuration)
+            };
+
+        }
+
+
+        [HttpPost("resetPassword")]
+        public async Task<IResult> ResetPassword([FromBody]ResetPassword model)
+        {
+            var user = await _userManager.FindByIdAsync(model.UserId);
+            if (user == null)
+            {
+                return Results.BadRequest();
+            }
+
+            var result = await _userManager.ResetPasswordAsync(user, model.Code, model.Password);
+            if (result.Succeeded)
+            {
+                return Results.Ok();
+            }
+            else
+            {
+                return Results.BadRequest();
+            }
+        }
+
 
         [HttpPost("manager")]
         [Authorize(Roles = UserRoles.Admin)]
         public async Task<Result<User?>> RegisterManager([FromBody] RegisterModel model)
         {
             var user = await _context.Users.CreateAsync(model, new List<string>() { UserRoles.User, UserRoles.Manager });
+
+            if (user != null)
+            {
+                var u = await _userManager.FindByIdAsync(user.Id);
+                await _verification.SendConfirmationEmailAsync(this, _configuration, u);
+            }
 
             var claims = new List<Claim>
                 {
@@ -174,6 +265,12 @@ namespace Watch.WebApi.Controllers
         public async Task<Result<User?>> RegisterAdmin([FromBody] RegisterModel model)
         {
             var user = await _context.Users.CreateAsync(model, new List<string>() { UserRoles.User, UserRoles.Admin });
+
+            if (user != null)
+            {
+                var u = await _userManager.FindByIdAsync(user.Id);
+                await _verification.SendConfirmationEmailAsync(this, _configuration, u);
+            }
 
             var claims = new List<Claim>
                 {

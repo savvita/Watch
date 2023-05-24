@@ -64,7 +64,13 @@ namespace Watch.DataAccess.Repositories
                 model.SecondName = entity.SecondName;
                 model.LastName = entity.LastName;
                 model.UserName = entity.UserName;
-                model.Email = entity.Email;
+
+                if(model.Email != entity.Email)
+                {
+                    model.Email = entity.Email;
+                    model.EmailConfirmed = false;
+                }
+
                 model.PhoneNumber = entity.PhoneNumber;
 
                 if (!CheckRowVersion(model.RowVersion, entity.RowVersion))

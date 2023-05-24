@@ -9,6 +9,7 @@
   <ItemGroup>
     <ProjectReference Include="..\Watch.DataAccess\Watch.DataAccess.csproj" />
     <ProjectReference Include="..\Watch.Domain\Watch.Domain.csproj" />
+    <ProjectReference Include="..\Watch.Email\Watch.Email.csproj" />
   </ItemGroup>
 
 </Project>

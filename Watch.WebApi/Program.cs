@@ -7,6 +7,7 @@ using Watch.DataAccess;
 using Watch.Domain.Models;
 using Watch.Files;
 using Watch.WebApi;
+using Watch.WebApi.Message;
 using ConfigurationManager = Watch.WebApi.ConfigurationManager;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -37,8 +38,9 @@ builder.Services.AddIdentity<UserModel, IdentityRole>()
 builder.Services.AddScoped<IFileController>(options => 
 {
     return new LocalFileController(builder.Configuration["RootPaths:LocalPath"], @"\images\watches\");
-    //return new LocalFileController(@"D:\html_source\React\watchshopmarket\public\images\watches\", @"\images\watches\");
 });
+
+builder.Services.AddScoped<IVerification, EmailVerification>();
 
 
 //TODO change password requirements

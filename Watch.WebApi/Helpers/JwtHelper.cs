@@ -65,5 +65,12 @@ namespace Watch.WebApi.Helpers
 
             return new JwtSecurityTokenHandler().WriteToken(JwtHelper.GetToken(claims, configuration));
         }
+
+        public static JwtSecurityToken ReadToken(string token)
+        {
+            var handler = new JwtSecurityTokenHandler();
+            var jwtSecurityToken = handler.ReadJwtToken(token);
+            return jwtSecurityToken;
+        }
     }
 }

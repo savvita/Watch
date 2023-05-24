@@ -13,7 +13,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Watch.DataAccess.UI", "Watc
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Watch.NovaPoshta", "Watch.NovaPoshta\Watch.NovaPoshta.csproj", "{4E86604F-FFE4-428D-B360-2DD93739EF1E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Watch.Files", "Watch.Files\Watch.Files.csproj", "{68DD63BB-4795-4819-9ACE-D32F97DFDC1A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Watch.Files", "Watch.Files\Watch.Files.csproj", "{68DD63BB-4795-4819-9ACE-D32F97DFDC1A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Watch.Email", "Watch.Email\Watch.Email.csproj", "{366530CD-F0D1-42EB-A1D6-186CB6ACB762}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -45,6 +47,10 @@ Global
 		{68DD63BB-4795-4819-9ACE-D32F97DFDC1A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{68DD63BB-4795-4819-9ACE-D32F97DFDC1A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{68DD63BB-4795-4819-9ACE-D32F97DFDC1A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{366530CD-F0D1-42EB-A1D6-186CB6ACB762}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{366530CD-F0D1-42EB-A1D6-186CB6ACB762}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{366530CD-F0D1-42EB-A1D6-186CB6ACB762}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{366530CD-F0D1-42EB-A1D6-186CB6ACB762}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

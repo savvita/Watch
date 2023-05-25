@@ -73,6 +73,11 @@ namespace Watch.DataAccess.Repositories
                 {
                     entity.Images.Add(item);
                 }
+
+                if(entity.Images.Count > 5)
+                {
+                    break;
+                }
             }
 
             var promotion = await _db.Promotions.FirstOrDefaultAsync(x => x.IsActive && (x.BrandId == null || x.BrandId == entity.BrandId));
@@ -182,6 +187,11 @@ namespace Watch.DataAccess.Repositories
                     if (!images.Select(x => x.Id).Contains(i.Id))
                     {
                         model.Images.Add(i);
+                    }
+
+                    if(model.Images.Count > 5)
+                    {
+                        break;
                     }
                 }
 

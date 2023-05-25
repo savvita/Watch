@@ -36,9 +36,14 @@ builder.Services.AddIdentity<UserModel, IdentityRole>()
     .AddEntityFrameworkStores<WatchDbContext>()
     .AddDefaultTokenProviders();
 
-builder.Services.AddScoped<IFileController>(options => 
+//builder.Services.AddScoped<IFileController>(options => 
+//{
+//    return new LocalFileController(builder.Configuration["RootPaths:LocalPath"], @"\images\watches\");
+//});
+
+builder.Services.AddScoped<IFileController>(options =>
 {
-    return new LocalFileController(builder.Configuration["RootPaths:LocalPath"], @"\images\watches\");
+    return new AWSFileController(builder.Configuration["S3:AccessKey"], builder.Configuration["S3:SecretKey"], Amazon.RegionEndpoint.EUNorth1, "watchshopbucket", builder.Configuration["RootPaths:AWS"]);
 });
 
 builder.Services.AddScoped<IVerification, EmailVerification>();
@@ -49,11 +54,11 @@ builder.Services.AddScoped<INotification, EmailNotification>();
 builder.Services.Configure<IdentityOptions>(options =>
 {
     // Password settings.
-    options.Password.RequireDigit = false;
+    options.Password.RequireDigit = true;
     options.Password.RequireLowercase = false;
     options.Password.RequireNonAlphanumeric = false;
     options.Password.RequireUppercase = false;
-    options.Password.RequiredLength = 3;
+    options.Password.RequiredLength = 5;
     options.Password.RequiredUniqueChars = 1;
 
     // Lockout settings.

@@ -35,61 +35,6 @@ namespace Watch.WebApi.Controllers
 
             List<string> urls = new List<string>();
 
-            //TODO delete comments
-            ////===local
-            //if (!Directory.Exists(ConfigurationManager.FileRoot))
-            //{
-            //    Directory.CreateDirectory(ConfigurationManager.FileRoot);
-            //}
-
-            //foreach (var uploadedFile in Request.Form.Files)
-            //{
-            //    string fileName = Guid.NewGuid().ToString() + "_" + uploadedFile.FileName;
-
-            //    string path = Path.Combine(ConfigurationManager.FileRoot, fileName);
-            //    using (var fileStream = new FileStream(path, FileMode.Create))
-            //    {
-            //        await uploadedFile.CopyToAsync(fileStream);
-            //    }
-            //    urls.Add(Path.Combine(ConfigurationManager.FileRoot, fileName));
-            //}
-            ////====
-
-            ////Azure + поменять путь ConfigurationManager.FileRoot
-            //var connectionString = _configuration.GetConnectionString("BlobConnection");
-
-            //string containerName = "files";
-            //var serviceClient = new BlobServiceClient(connectionString);
-            //var containerClient = serviceClient.GetBlobContainerClient(containerName);
-
-            //foreach (var uploadedFile in Request.Form.Files)
-            //{
-            //    if(uploadedFile.Length > 100000 || !FileHelper.IsImage(uploadedFile))
-            //    {
-            //        continue;
-            //    }
-            //    string fileName = Guid.NewGuid().ToString() + "_" + uploadedFile.FileName;
-
-            //    var blobClient = containerClient.GetBlobClient(fileName);
-            //    await blobClient.UploadAsync(uploadedFile.OpenReadStream(), true);
-            //    urls.Add(Path.Combine(ConfigurationManager.FileRoot, fileName));
-            //}
-
-            //var connectionString = _configuration.GetConnectionString("BlobConnection");
-
-            //string containerName = "files";
-
-            //var blob = new AzureBlob(connectionString!, containerName);
-
-            //foreach (var uploadedFile in Request.Form.Files)
-            //{
-            //    if (uploadedFile.Length > 1024 * 1024 || !FileHelper.IsImage(uploadedFile))
-            //    {
-            //        continue;
-            //    }
-            //    urls.Add(await blob.UploadFileAsync(uploadedFile));
-            //}
-
             foreach(var uploadedFile in Request.Form.Files)
             {
                 if (uploadedFile.Length > FileHelper.MaxSize || !FileHelper.IsImage(uploadedFile))
@@ -98,8 +43,16 @@ namespace Watch.WebApi.Controllers
                 }
                 string fileName = Guid.NewGuid().ToString() + "_" + uploadedFile.FileName;
 
+                try
+                {
+                    var file = await _controller.UploadFileAsync(uploadedFile.OpenReadStream(), fileName);
+                    urls.Add(file);
+                }
+                catch
+                {
+                    continue;
+                }
 
-                urls.Add(await _controller.UploadFileAsync(uploadedFile.OpenReadStream(), fileName));
             }
 
             return new Result<List<string>>
@@ -144,15 +97,6 @@ namespace Watch.WebApi.Controllers
         {
             await _context.Users.CheckUserAsync(User.Identity);
 
-            //TODO delete comments
-            //var connectionString = _configuration.GetConnectionString("BlobConnection");
-
-            //string containerName = "files";
-            //var blob = new AzureBlob(connectionString!, containerName);
-
-            //var images = await _context.Images.GetAsync();
-
-            //var res = (await blob.GetBlobListAsync()).Where(x => images.FirstOrDefault(i => i.Value == x) == null);
             var images = await _context.Images.GetAsync();
             var slides = await _context.Slides.GetAsync();
             var res = (await _controller.GetFileListAsync()).Where(x => images.FirstOrDefault(i => i.Value == x) == null && slides.FirstOrDefault(i => i.ImageUrl == x) == null);
@@ -170,23 +114,6 @@ namespace Watch.WebApi.Controllers
         public async Task<Result<bool>> Delete([FromBody] List<string> files)
         {
             await _context.Users.CheckUserAsync(User.Identity);
-
-            //TODO delete comments
-
-            //var connectionString = _configuration.GetConnectionString("BlobConnection");
-
-            //string containerName = "files";
-            //var blob = new AzureBlob(connectionString!, containerName);
-
-            //int count = 0;
-
-            //files.ForEach(async file =>
-            //{
-            //    if (await blob.DeleteFileAsync(file) == true)
-            //    {
-            //        count++;
-            //    }
-            //});
 
             int count = 0;
 

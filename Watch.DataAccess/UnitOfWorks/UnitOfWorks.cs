@@ -109,6 +109,11 @@ namespace Watch.DataAccess.UnitOfWorks
             {
                 try
                 {
+                    if(basket.Details.Count == 0)
+                    {
+                        transaction.Rollback();
+                        return null;
+                    }
                     var delivery = await Deliveries.GetAsync(info.DeliveryId);
                     if(delivery == null || !delivery.IsActive)
                     {

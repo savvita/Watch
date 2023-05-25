@@ -240,7 +240,14 @@ namespace Watch.WebApi.Controllers
             if(res != null)
             {
                 var u = await _userManager.FindByNameAsync(username.Value);
-                await _notification.SendOrderNotificationAsync(u, (OrderModel)res);
+                try
+                {
+                    await _notification.SendOrderNotificationAsync(u, (OrderModel)res);
+                }
+                catch
+                {
+
+                }
             }
             return new Result<Order>
             {

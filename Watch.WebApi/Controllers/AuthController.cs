@@ -83,8 +83,15 @@ namespace Watch.WebApi.Controllers
             if (user != null)
             {
                 var u = await _userManager.FindByIdAsync(user.Id);
-                await _verification.SendConfirmationEmailAsync(this, _configuration, u);
-                await _notification.SendRegistrationNotificationAsync(u);
+                try
+                {
+                    await _verification.SendConfirmationEmailAsync(this, _configuration, u);
+                    await _notification.SendRegistrationNotificationAsync(u);
+                }
+                catch
+                {
+
+                }
             }
 
             var claims = new List<Claim>
@@ -114,7 +121,14 @@ namespace Watch.WebApi.Controllers
             if (user != null)
             {
                 var u = await _userManager.FindByIdAsync(user.Id);
-                await _verification.SendConfirmationEmailAsync(this, _configuration, u);
+                try
+                {
+                    await _verification.SendConfirmationEmailAsync(this, _configuration, u);
+                }
+                catch
+                {
+
+                }
             }
 
             return new Result<IResult>()
@@ -157,7 +171,14 @@ namespace Watch.WebApi.Controllers
 
             if (user != null)
             {
-                await _verification.SendResetPasswordEmailAsync(this, _configuration, _userManager, model.UserName);
+                try
+                {
+                    await _verification.SendResetPasswordEmailAsync(this, _configuration, _userManager, model.UserName);
+                }
+                catch
+                {
+
+                }
             }
 
             return Results.Ok();
@@ -185,7 +206,14 @@ namespace Watch.WebApi.Controllers
                             await _userManager.ChangePasswordAsync(user, model.OldPassword, model.NewPassword);
                         if (result.Succeeded)
                         {
-                            await _notification.SendChangePaswordNotificationAsync(user, DateTime.Now);
+                            try
+                            {
+                                await _notification.SendChangePaswordNotificationAsync(user, DateTime.Now);
+                            }
+                            catch
+                            {
+
+                            }
                             return new Result<bool>
                             {
                                 Value = true,
@@ -228,7 +256,13 @@ namespace Watch.WebApi.Controllers
             var result = await _userManager.ResetPasswordAsync(user, model.Code, model.Password);
             if (result.Succeeded)
             {
-                await _notification.SendResetPaswordNotificationAsync(user, DateTime.Now);
+                try
+                {
+                    await _notification.SendResetPaswordNotificationAsync(user, DateTime.Now);
+                }
+                catch
+                {
+                }
                 return Results.Ok();
             }
             else
@@ -247,8 +281,15 @@ namespace Watch.WebApi.Controllers
             if (user != null)
             {
                 var u = await _userManager.FindByIdAsync(user.Id);
-                await _verification.SendConfirmationEmailAsync(this, _configuration, u);
-                await _notification.SendRegistrationNotificationAsync(u);
+                try
+                {
+                    await _verification.SendConfirmationEmailAsync(this, _configuration, u);
+                    await _notification.SendRegistrationNotificationAsync(u);
+                }
+                catch
+                {
+
+                }
             }
 
             var claims = new List<Claim>
@@ -278,8 +319,15 @@ namespace Watch.WebApi.Controllers
             if (user != null)
             {
                 var u = await _userManager.FindByIdAsync(user.Id);
-                await _verification.SendConfirmationEmailAsync(this, _configuration, u);
-                await _notification.SendRegistrationNotificationAsync(u);
+                try
+                {
+                    await _verification.SendConfirmationEmailAsync(this, _configuration, u);
+                    await _notification.SendRegistrationNotificationAsync(u);
+                }
+                catch
+                {
+
+                }
             }
 
             var claims = new List<Claim>
